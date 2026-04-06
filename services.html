@@ -9,7 +9,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Italiana&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css?v=1.2">
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+      import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+      import firebaseConfig from "./firebase-config.js";
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+
+      window.firebaseApp = app;
+      window.db = db;
+      window.auth = auth;
+    </script>
+
     <script src="script.js" defer></script>
 </head>
 <body>
@@ -82,7 +99,7 @@
     <footer class="minimal-footer">
         <div class="footer-grid">
             <div class="footer-col">
-                <img src="https://i.postimg.cc/1XL45pYk/Can-u-make-only-the-outline-of-the-lightning-be-wh-delpmaspu-removebg-preview.png" alt="Voltz Digital" class="footer-logo">
+                <img src="https://i.postimg.cc/1XL45pYk/Can-u-make-only-the-outline-of-the-lightning-be-wh-delpmaspu-removebg-preview.png" alt="Voltz Digital" style="height: 180px; margin-bottom: 20px; border-radius: 8px;">
                 <p>Lightning-Fast Websites for Growing Businesses. You innovate, we automate.</p>
                 <div class="social-icons">
                     <a href="#"><i class="fa-brands fa-instagram"></i></a>

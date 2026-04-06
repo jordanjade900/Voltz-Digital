@@ -15,6 +15,25 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+      import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+      import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+      import firebaseConfig from "./firebase-config.js";
+
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+
+      window.firebaseApp = app;
+      window.db = db;
+      window.auth = auth;
+    </script>
+
     <script src="script.js" defer></script>
 </head>
 <body>
@@ -214,13 +233,13 @@
         <div class="container">
             <div class="section-header fade-up">
                 <h2>Transparent Pricing</h2>
-                <p>No hidden fees. Just high-quality infrastructure.</p>
+                <p>No hidden fees. Just high-quality infrastructure. Pricing in USD.</p>
             </div>
             <div class="grid grid-3">
                 <div class="minimal-card pricing-card fade-up delay-1">
                     <h3>Bronze</h3>
                     <p>Perfect for small local businesses</p>
-                    <div class="pricing-price">$299</div>
+                    <div class="pricing-price">$350</div>
                     <ul class="pricing-features">
                         <li><i class="fa-solid fa-check"></i> Custom 3-Page Website</li>
                         <li><i class="fa-solid fa-check"></i> Mobile Responsive</li>

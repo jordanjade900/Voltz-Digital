@@ -111,6 +111,60 @@ if (menuToggle && navOverlay) {
     });
 }
 
+// Dodo Payments Checkout Logic
+async function handleCheckout(packageType) {
+    const pricing = {
+        'bronze': 299,
+        'silver': 599,
+        'gold': 1199
+    };
+
+    const amount = pricing[packageType];
+    const email = prompt("Please enter your email for the receipt:");
+    
+    if (!email) return;
+
+    try {
+        const response = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                amount,
+                currency: 'USD',
+                productId: `voltz-${packageType}`,
+                customerEmail: email
+            })
+        });
+
+        const data = await response.json();
+        
+        if (data.url) {
+            window.location.href = data.url;
+        } else {
+            alert("Checkout failed. Please try again later.");
+        }
+    } catch (error) {
+        console.error("Checkout error:", error);
+        alert("An error occurred. Please check your connection.");
+    }
+}
+
+// Attach checkout events to pricing buttons
+document.addEventListener('DOMContentLoaded', () => {
+    const pricingButtons = document.querySelectorAll('.pricing-card .btn-outline, .pricing-card .btn-primary-action');
+    
+    pricingButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const card = btn.closest('.pricing-card');
+            const packageName = card.querySelector('h3').textContent.toLowerCase();
+            handleCheckout(packageName);
+        });
+    });
+});
+
 // Scroll Animations (Intersection Observer)
 const observerOptions = {
     root: null,
