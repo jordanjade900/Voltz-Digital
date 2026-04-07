@@ -88,7 +88,38 @@ if (canvas) {
     animateParticles();
 }
 
-// Menu Toggle Logic
+// Floating Nav Visibility & Indicator Logic
+const floatingNav = document.querySelector('.floating-nav');
+const navIndicator = document.querySelector('.nav-indicator');
+const navLinks = document.querySelectorAll('.floating-nav a');
+
+function updateIndicator(link) {
+    if (!navIndicator || !link) return;
+    navIndicator.style.width = `${link.offsetWidth}px`;
+    navIndicator.style.left = `${link.offsetLeft}px`;
+}
+
+if (floatingNav) {
+    // Initial visibility
+    setTimeout(() => {
+        floatingNav.classList.add('visible');
+        const activeLink = document.querySelector('.floating-nav a.active-link');
+        updateIndicator(activeLink);
+    }, 500);
+
+    // Hover effect for indicator
+    navLinks.forEach(link => {
+        link.addEventListener('mouseenter', () => updateIndicator(link));
+    });
+
+    // Reset indicator to active link on mouse leave
+    floatingNav.addEventListener('mouseleave', () => {
+        const activeLink = document.querySelector('.floating-nav a.active-link');
+        updateIndicator(activeLink);
+    });
+}
+
+// Menu Toggle Logic (Disabled for floating nav)
 const menuToggle = document.querySelector('.menu-toggle');
 const navOverlay = document.querySelector('.nav-overlay');
 
@@ -98,15 +129,15 @@ if (menuToggle && navOverlay) {
         // Animate hamburger to X
         const lines = menuToggle.querySelectorAll('.hamburger-line');
         if (navOverlay.classList.contains('active')) {
-            lines[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+            lines[0].style.transform = 'rotate(45deg) translate(6px, 6px)';
             lines[1].style.opacity = '0';
-            lines[2].style.transform = 'rotate(-45deg) translate(7px, -6px)';
-            lines[1].style.width = '30px'; // reset width
+            lines[1].style.transform = 'translateX(-20px)';
+            lines[2].style.transform = 'rotate(-45deg) translate(6px, -6px)';
         } else {
             lines[0].style.transform = 'none';
             lines[1].style.opacity = '1';
+            lines[1].style.transform = 'none';
             lines[2].style.transform = 'none';
-            lines[1].style.width = '20px';
         }
     });
 }

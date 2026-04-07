@@ -37,7 +37,7 @@ a { text-decoration: none; color: inherit; }
 .minimal-header {
   position: absolute;
   top: 0; left: 0; width: 100%;
-  padding: 20px 0;
+  padding: 20px 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -46,21 +46,21 @@ a { text-decoration: none; color: inherit; }
 
 .logo {
   display: inline-block;
-  padding: 0 !important;
-  margin: 0 !important;
+  padding: 0;
+  margin: 0;
 }
 
 .logo img {
   height: 250px;
   border-radius: 8px;
-  margin-left: -250px !important;
+  display: block;
 }
 
 .footer-logo {
   height: 250px;
   margin-bottom: 20px;
   border-radius: 8px;
-  margin-left: -250px !important;
+  display: block;
 }
 
 .menu-toggle {
@@ -297,40 +297,137 @@ a { text-decoration: none; color: inherit; }
   .hero-stats-row { flex-direction: column; gap: 40px; }
 }
 
-/* Navigation Overlay */
-.nav-overlay {
+/* Floating Navigation Taskbar */
+.floating-nav {
   position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background-color: rgba(5, 5, 5, 0.98);
-  backdrop-filter: blur(15px);
-  z-index: 90;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  background: rgba(15, 15, 15, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 6px;
+  border-radius: 40px;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
+  z-index: 1000;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   opacity: 0;
-  pointer-events: none;
-  transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.nav-overlay.active {
+
+.floating-nav.visible {
+  transform: translateX(-50%) translateY(0);
   opacity: 1;
-  pointer-events: auto;
 }
-.nav-overlay a {
-  font-size: clamp(2rem, 5vw, 4rem);
-  font-weight: 500;
-  margin: 15px 0;
-  padding-bottom: 5px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-  letter-spacing: -0.04em;
-  transition: 0.3s;
+
+/* Sliding Indicator (Hover State) */
+.nav-indicator {
+  position: absolute;
+  height: calc(100% - 12px);
+  background: var(--primary);
+  border-radius: 30px;
+  transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: -1;
+  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+  opacity: 0; /* Hidden by default, shown on hover */
+}
+
+.floating-nav:hover .nav-indicator {
+  opacity: 1;
+}
+
+.floating-nav a {
   color: var(--text-muted);
-  display: inline-block;
+  text-decoration: none;
+  padding: 10px 22px;
+  border-radius: 30px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
 }
-.nav-overlay a:hover, .nav-overlay a.active-link {
-  color: var(--text-main);
-  transform: translateX(10px);
-  border-bottom-color: rgba(255, 255, 255, 0.8);
+
+.floating-nav a i {
+  font-size: 1.1rem;
+  transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Icon hover animation */
+.floating-nav a:hover i {
+  transform: translateY(-4px) scale(1.2);
+}
+
+/* When hovering over the taskbar, items turn black when the indicator is behind them */
+.floating-nav a:hover, 
+.floating-nav a:hover i {
+  color: #000 !important;
+}
+
+/* Persistent Active State (Selected Section) */
+.floating-nav a.active-link {
+  color: var(--primary);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(0, 212, 255, 0.2);
+}
+
+.floating-nav a.active-link i {
+  color: var(--primary);
+}
+
+/* When hovering over the active link, it also turns black for contrast */
+.floating-nav a.active-link:hover,
+.floating-nav a.active-link:hover i {
+  color: #000 !important;
+}
+
+/* Hide old menu elements */
+.menu-toggle, .nav-overlay {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .floating-nav {
+    width: 92%;
+    padding: 4px;
+    top: 20px;
+    gap: 0;
+  }
+  
+  .floating-nav a {
+    padding: 12px;
+    flex: 1;
+    justify-content: center;
+    font-size: 0;
+  }
+  
+  .floating-nav a i {
+    font-size: 1.3rem;
+    margin: 0;
+  }
+  
+  .nav-indicator {
+    background: var(--primary);
+    box-shadow: 0 4px 10px rgba(0, 212, 255, 0.3);
+  }
+  
+  .floating-nav a.active-link {
+    color: var(--primary);
+    background: transparent;
+    box-shadow: none;
+  }
+  
+  .floating-nav a.active-link i {
+    color: var(--primary);
+  }
+
+  .floating-nav a:active i {
+    transform: scale(0.9);
+  }
 }
 
 /* Portfolio Cards */
@@ -805,7 +902,8 @@ textarea.form-control {
   .footer-grid { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 600px) {
-  .logo img, .footer-logo { height: 150px; margin-left: -200px !important; }
+  .minimal-header { padding: 15px 20px; }
+  .logo img, .footer-logo { height: 150px; }
   .hero-new, .page-header { padding-top: 220px; }
   .footer-grid { grid-template-columns: 1fr; }
   .footer-bottom { flex-direction: column; gap: 15px; text-align: center; }
