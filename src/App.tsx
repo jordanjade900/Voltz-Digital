@@ -16,6 +16,7 @@ export default function App() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [portfolioFilter, setPortfolioFilter] = useState('all');
   const [scrollY, setScrollY] = useState(0);
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const navIndicatorRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
@@ -195,52 +196,18 @@ export default function App() {
     }
   };
 
-  const handleCheckout = async (packageType: string) => {
-    const pricing: Record<string, number> = {
-      'bronze': 350,
-      'silver': 599,
-      'gold': 1199
-    };
-
-    const amount = pricing[packageType.toLowerCase()];
-    const email = prompt("Please enter your email for the receipt:");
-    
-    if (!email) return;
-
-    try {
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          amount,
-          currency: 'USD',
-          productId: `voltz-${packageType.toLowerCase()}`,
-          customerEmail: email
-        })
-      });
-
-      const data = await response.json();
-      
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Checkout failed. Please try again later.");
-      }
-    } catch (error) {
-      console.error("Checkout error:", error);
-      alert("An error occurred. Please check your connection.");
-    }
+  const handleCheckout = (packageType: string) => {
+    // Redirect to Whop checkout link
+    window.location.href = "https://whop.com/voltz-digital/checkout/prod_w4K0Oa0QTDnKx";
   };
 
   const portfolioItems = [
-    { id: 1, category: 'ecommerce', tag: 'E-Commerce', title: 'Jamwood Epoxy', url: 'https://jamwoodepoxy.com', img: 'https://i.postimg.cc/15YTDFC8/image-2026-03-01-231618589.png', desc: 'A premium showcase and e-commerce platform for custom wood and epoxy craftsmanship.' },
-    { id: 2, category: 'service-provider', tag: 'Event Showcase', title: 'UTech Brand Expo', url: 'https://utechbrandexpoja.netlify.app', img: 'https://i.postimg.cc/RFDfgvjk/image-2026-03-01-232122830.png', desc: 'A dynamic event platform showcasing student innovation and brand excellence at UTech, Jamaica.' },
-    { id: 3, category: 'service-provider', tag: 'Event Showcase', title: 'Miss UTech Jamaica', url: 'https://missutechja.netlify.app', img: 'https://res.cloudinary.com/dad155oxi/image/upload/v1774560772/WhatsApp_Image_2026-03-26_at_4.32.31_PM_qm0skt.jpg', desc: 'Official platform for the Miss UTech Jamaica pageant, featuring contestant profiles and event highlights.' },
-    { id: 4, category: 'local-business', tag: 'Local Business', title: 'Island Properties', img: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', desc: 'A property listing platform with advanced search and filtering.' },
-    { id: 5, category: 'service-provider', tag: 'Service Provider', title: 'Apex Consulting', img: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', desc: 'A professional corporate site designed to establish authority and trust.' },
-    { id: 6, category: 'ecommerce', tag: 'E-Commerce', title: 'Urban Threads', img: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', desc: 'A sleek, fast-loading online store for a modern clothing brand.' }
+    { id: 1, category: 'ecommerce', tag: 'E-Commerce', title: 'Jamwood Epoxy', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://i.postimg.cc/15YTDFC8/image-2026-03-01-231618589.png', desc: 'A premium showcase and e-commerce platform for custom wood and epoxy craftsmanship.' },
+    { id: 2, category: 'service-provider', tag: 'Event Showcase', title: 'UTech Brand Expo', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://i.postimg.cc/RFDfgvjk/image-2026-03-01-232122830.png', desc: 'A dynamic event platform showcasing student innovation and brand excellence at UTech, Jamaica.' },
+    { id: 3, category: 'service-provider', tag: 'Event Showcase', title: 'Miss UTech Jamaica', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://res.cloudinary.com/dad155oxi/image/upload/v1774560772/WhatsApp_Image_2026-03-26_at_4.32.31_PM_qm0skt.jpg', desc: 'Official platform for the Miss UTech Jamaica pageant, featuring contestant profiles and event highlights.' },
+    { id: 4, category: 'local-business', tag: 'Local Business', title: 'Island Properties', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', desc: 'A property listing platform with advanced search and filtering.' },
+    { id: 5, category: 'service-provider', tag: 'Service Provider', title: 'Apex Consulting', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', desc: 'A professional corporate site designed to establish authority and trust.' },
+    { id: 6, category: 'ecommerce', tag: 'E-Commerce', title: 'Urban Threads', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', desc: 'A sleek, fast-loading online store for a modern clothing brand.' }
   ];
 
   const filteredPortfolio = portfolioFilter === 'all' 
@@ -325,7 +292,7 @@ export default function App() {
                   At Voltz Digital, we believe that every business deserves a world-class online presence without the months of waiting and exorbitant agency fees.
                 </p>
                 <p style={{ color: 'var(--text-muted)', lineHeight: 1.8, marginBottom: '30px', fontSize: '1.1rem' }}>
-                  Based in Kingston, Jamaica, we combine cutting-edge AI technology with expert human design to deliver stunning, high-performance websites in a fraction of the traditional time.
+                  Based in Kingston, Jamaica, we follow a general blueprint of a two-week turnaround for most projects. Depending on the complexity of your requirements, production typically takes between one to two weeks, with simpler websites often delivered in under a week.
                 </p>
                 <div style={{ display: 'flex', gap: '40px' }}>
                   <div>
@@ -333,7 +300,7 @@ export default function App() {
                     <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Projects Delivered</div>
                   </div>
                   <div>
-                    <div style={{ fontSize: '2.5rem', color: 'var(--primary)', fontWeight: 500 }}>3 Days</div>
+                    <div style={{ fontSize: '2.5rem', color: 'var(--primary)', fontWeight: 500 }}>1-2 Weeks</div>
                     <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Average Turnaround</div>
                   </div>
                 </div>
@@ -365,17 +332,22 @@ export default function App() {
             </div>
             <div className="grid grid-3">
               {filteredPortfolio.map((item, idx) => (
-                <div key={item.id} className={`portfolio-card fade-up delay-${(idx % 3) + 1} in-view`}>
-                  <img src={item.img} alt={item.title} className="portfolio-img" referrerPolicy="no-referrer" />
+                <div 
+                  key={item.id} 
+                  className={`portfolio-card fade-up delay-${(idx % 3) + 1} in-view`}
+                  onClick={() => setSelectedVideo(item.videoUrl)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="portfolio-img-wrapper">
+                    <img src={item.img} alt={item.title} className="portfolio-img" referrerPolicy="no-referrer" />
+                    <div className="portfolio-overlay">
+                      <i className="fa-solid fa-play"></i>
+                      <span>Watch Presentation</span>
+                    </div>
+                  </div>
                   <div className="portfolio-content">
                     <span className="portfolio-tag">{item.tag}</span>
-                    <h3>
-                      {item.url ? (
-                        <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>
-                          {item.title} <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.7em', marginLeft: '5px', opacity: 0.7 }}></i>
-                        </a>
-                      ) : item.title}
-                    </h3>
+                    <h3>{item.title}</h3>
                     <p>{item.desc}</p>
                   </div>
                 </div>
@@ -613,6 +585,26 @@ export default function App() {
           </div>
         </section>
       </main>
+
+      {/* Video Modal */}
+      {selectedVideo && (
+        <div className="video-modal" onClick={() => setSelectedVideo(null)}>
+          <div className="video-modal-content" onClick={e => e.stopPropagation()}>
+            <button className="close-modal" onClick={() => setSelectedVideo(null)}>
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+            <div className="video-container">
+              <iframe 
+                src={`${selectedVideo}?autoplay=1`}
+                title="Project Presentation"
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowFullScreen
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      )}
 
       <footer className="minimal-footer">
         <div className="footer-grid">
