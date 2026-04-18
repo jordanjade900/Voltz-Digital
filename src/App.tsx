@@ -3,6 +3,8 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import firebaseConfig from '../firebase-config.js';
+import Particles from './components/Particles';
+import OnboardingForm from './components/OnboardingForm';
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -17,106 +19,21 @@ export default function App() {
   const [portfolioFilter, setPortfolioFilter] = useState('all');
   const [scrollY, setScrollY] = useState(0);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const navIndicatorRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
 
-  // Particle Background Logic
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let width: number, height: number;
-    let particles: Particle[] = [];
-
-    class Particle {
-      x: number;
-      y: number;
-      z: number;
-      size: number;
-      speedX: number;
-      speedY: number;
-      opacity: number;
-
-      constructor() {
-        this.x = Math.random() * width;
-        this.y = Math.random() * height;
-        this.z = Math.random() * 3 + 0.5;
-        this.size = this.z;
-        this.speedX = (Math.random() - 0.5) * 0.3;
-        this.speedY = (Math.random() - 0.5) * 0.3;
-        this.opacity = (this.z / 3) * 0.5 + 0.1;
-      }
-
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-
-        if (this.x < 0) this.x = width;
-        if (this.x > width) this.x = 0;
-        if (this.y < 0) this.y = height;
-        if (this.y > height) this.y = 0;
-      }
-
-      draw() {
-        if (!ctx) return;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-        ctx.fill();
-      }
-    }
-
-    function resize() {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas!.width = width;
-      canvas!.height = height;
-      initParticles();
-    }
-
-    function initParticles() {
-      particles = [];
-      const particleCount = Math.floor((width * height) / 12000);
-      for (let i = 0; i < particleCount; i++) {
-        particles.push(new Particle());
-      }
-    }
-
-    function animate() {
-      ctx!.clearRect(0, 0, width, height);
-      ctx!.lineWidth = 0.5;
-      for (let i = 0; i < particles.length; i++) {
-        particles[i].update();
-        particles[i].draw();
-        for (let j = i; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          if (distance < 120) {
-            ctx!.beginPath();
-            ctx!.strokeStyle = `rgba(255, 255, 255, ${0.15 * (1 - distance / 120)})`;
-            ctx!.moveTo(particles[i].x, particles[i].y);
-            ctx!.lineTo(particles[j].x, particles[j].y);
-            ctx!.stroke();
-          }
-        }
-      }
-      requestAnimationFrame(animate);
-    }
-
-    window.addEventListener('resize', resize);
-    resize();
-    animate();
-
-    return () => window.removeEventListener('resize', resize);
-  }, []);
 
   // Scroll Animations & Active Section Tracking
   useEffect(() => {
+    // Check for onboarding trigger in URL
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('onboarding') === 'true' || params.get('order') === 'success') {
+      setShowOnboarding(true);
+      // Clean up URL without refreshing
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     const observerOptions = {
       root: null,
       rootMargin: '0px',
@@ -201,7 +118,7 @@ export default function App() {
     window.location.href = "https://whop.com/voltz-digital/checkout/prod_w4K0Oa0QTDnKx";
   };
 
-  const portfolioItems = [
+    const portfolioItems = [
     { id: 1, category: 'ecommerce', tag: 'E-Commerce', title: 'Jamwood Epoxy', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://i.postimg.cc/15YTDFC8/image-2026-03-01-231618589.png', desc: 'A premium showcase and e-commerce platform for custom wood and epoxy craftsmanship.' },
     { id: 2, category: 'service-provider', tag: 'Event Showcase', title: 'UTech Brand Expo', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://i.postimg.cc/RFDfgvjk/image-2026-03-01-232122830.png', desc: 'A dynamic event platform showcasing student innovation and brand excellence at UTech, Jamaica.' },
     { id: 3, category: 'service-provider', tag: 'Event Showcase', title: 'Miss UTech Jamaica', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://res.cloudinary.com/dad155oxi/image/upload/v1774560772/WhatsApp_Image_2026-03-26_at_4.32.31_PM_qm0skt.jpg', desc: 'Official platform for the Miss UTech Jamaica pageant, featuring contestant profiles and event highlights.' },
@@ -216,7 +133,18 @@ export default function App() {
 
   return (
     <div className="app-container">
-      <canvas ref={canvasRef} id="bg-canvas"></canvas>
+      <div className="particles-container">
+        <Particles
+          particleColors={["#00D4FF", "#ffffff"]}
+          particleCount={250}
+          particleSpread={12}
+          speed={0.1}
+          particleBaseSize={100}
+          moveParticlesOnHover={false}
+          alphaParticles={false}
+          disableRotation={false}
+        />
+      </div>
 
       <nav className={`floating-nav ${isNavVisible ? 'visible' : ''}`} ref={navRef}>
         <div className="nav-indicator" ref={navIndicatorRef}></div>
@@ -447,9 +375,9 @@ export default function App() {
             </div>
             <div className="grid grid-3">
               {[
-                { name: 'Bronze', price: '$350', desc: 'Perfect for small local businesses', features: ['Custom 3-Page Website', 'Mobile Responsive', 'Basic SEO Setup', 'Contact Form'] },
-                { name: 'Silver', price: '$599', desc: 'Great for growing service companies', popular: true, features: ['Custom 5-Page Website', 'Advanced SEO Optimization', 'Booking/Lead Integration', '1 Month Free Maintenance'] },
-                { name: 'Gold', price: '$1,199', desc: 'Full e-commerce & advanced features', features: ['Full E-commerce Store', 'Payment Gateway Setup', 'Product Uploads (Up to 50)', 'Premium Support'] }
+                { name: 'Bronze', price: '$600', desc: 'Perfect for small local businesses', features: ['Custom 3-Page Website', 'Mobile Responsive', 'Basic SEO Setup', 'Contact Form'] },
+                { name: 'Silver', price: '$1000', desc: 'Great for growing service companies', popular: true, features: ['Custom 5-Page Website', 'Advanced SEO Optimization', 'Booking/Lead Integration', '1 Month Free Maintenance'] },
+                { name: 'Gold', price: '$2500', desc: 'Full e-commerce & advanced features', features: ['Full E-commerce Store', 'Payment Gateway Setup', 'Product Uploads (Up to 50)', 'Premium Support'] }
               ].map((p, i) => (
                 <div key={i} className={`minimal-card pricing-card ${p.popular ? 'popular' : ''} fade-up delay-${i + 1}`}>
                   {p.popular && <div className="popular-badge">MOST POPULAR</div>}
@@ -516,12 +444,13 @@ export default function App() {
         <section id="contact" className="minimal-section">
           <div className="container">
             <div className="section-header fade-up">
-              <h2>Let's Build Something.</h2>
-              <p>Ready to upgrade your online presence? Drop us a line and let's get started.</p>
+              <h2>Get in Touch.</h2>
+              <p>Ready to upgrade your online presence? Drop us a line or start an order to begin onboarding.</p>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth > 900 ? '1fr 1.5fr' : '1fr', gap: '60px' }}>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth > 900 ? '1fr 1fr' : '1fr', gap: '60px' }}>
               <div className="fade-up delay-1">
-                <h3 style={{ fontSize: '1.8rem', fontWeight: 500, marginBottom: '30px', letterSpacing: '-0.02em' }}>Get in Touch</h3>
+                <h3 style={{ fontSize: '1.8rem', fontWeight: 500, marginBottom: '30px', letterSpacing: '-0.02em' }}>Contact Information</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', marginBottom: '40px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(0, 212, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontSize: '1.2rem' }}>
@@ -541,45 +470,57 @@ export default function App() {
                       <p style={{ margin: 0, color: 'var(--text-muted)' }}>+1 (876) XXX-XXXX</p>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(0, 212, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontSize: '1.2rem' }}>
-                      <i className="fa-solid fa-location-dot"></i>
+                </div>
+
+                <div className="minimal-card" style={{ padding: '30px', background: 'rgba(0, 212, 255, 0.03)', border: '1px solid rgba(0, 212, 255, 0.1)' }}>
+                  <h4 style={{ marginBottom: '15px', color: 'var(--primary)' }}>Already placed an order?</h4>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '20px' }}>
+                    If you've already completed your payment, you can launch the onboarding form to provide your details.
+                  </p>
+                  <button 
+                    onClick={() => setShowOnboarding(true)}
+                    className="btn-outline"
+                    style={{ fontSize: '0.9rem', padding: '10px 20px' }}
+                  >
+                    Start Onboarding <i className="fa-solid fa-arrow-right" style={{ marginLeft: '8px' }}></i>
+                  </button>
+                </div>
+              </div>
+
+              <div className="fade-up delay-2">
+                <div className="minimal-card" style={{ padding: '40px' }}>
+                  <h3 style={{ fontSize: '1.5rem', marginBottom: '20px', fontWeight: 500 }}>How it Works</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+                    <div style={{ display: 'flex', gap: '20px' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--primary)', fontSize: '1.2rem' }}>01</div>
+                      <div>
+                        <h4 style={{ marginBottom: '5px' }}>Choose a Package</h4>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Select the plan that fits your business needs above.</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 style={{ margin: '0 0 5px 0', fontWeight: 500 }}>Location</h4>
-                      <p style={{ margin: 0, color: 'var(--text-muted)' }}>Kingston, Jamaica</p>
+                    <div style={{ display: 'flex', gap: '20px' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--primary)', fontSize: '1.2rem' }}>02</div>
+                      <div>
+                        <h4 style={{ marginBottom: '5px' }}>Secure Checkout</h4>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Complete your transaction securely via Whop.</p>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '20px' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--primary)', fontSize: '1.2rem' }}>03</div>
+                      <div>
+                        <h4 style={{ marginBottom: '5px' }}>Detailed Onboarding</h4>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Fill out our comprehensive form to guide our build.</p>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '20px' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--primary)', fontSize: '1.2rem' }}>04</div>
+                      <div>
+                        <h4 style={{ marginBottom: '5px' }}>Fast Delivery</h4>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Get your high-performance site in just 7-10 days.</p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="minimal-card fade-up delay-2">
-                <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST" className="minimal-form">
-                  <div className="form-group">
-                    <label htmlFor="name">Full Name</label>
-                    <input type="text" id="name" name="name" className="form-control" required placeholder="John Doe" />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="email">Email Address</label>
-                    <input type="email" id="email" name="email" className="form-control" required placeholder="john@example.com" />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="service">Service Needed</label>
-                    <select id="service" name="service" className="form-control" required defaultValue="" style={{ appearance: 'none', backgroundImage: "url('data:image/svg+xml;utf8,<svg fill=%22white%22 height=%2224%22 viewBox=%220 0 24 24%22 width=%2224%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M7 10l5 5 5-5z%22/><path d=%22M0 0h24v24H0z%22 fill=%22none%22/></svg>')", backgroundRepeat: 'no-repeat', backgroundPositionX: '95%', backgroundPositionY: '50%' }}>
-                      <option value="" disabled style={{ color: '#000' }}>Select a service</option>
-                      <option value="website" style={{ color: '#000' }}>Website Design</option>
-                      <option value="ecommerce" style={{ color: '#000' }}>E-commerce Store</option>
-                      <option value="seo" style={{ color: '#000' }}>SEO Optimization</option>
-                      <option value="other" style={{ color: '#000' }}>Other</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="message">Project Details</label>
-                    <textarea id="message" name="message" className="form-control" required placeholder="Tell us about your business and what you're looking to build..."></textarea>
-                  </div>
-                  <button type="submit" className="btn-primary-action btn-block" style={{ justifyContent: 'center', width: '100%', fontSize: '1.1rem' }}>
-                    Send Message <i className="fa-solid fa-paper-plane" style={{ marginLeft: '10px' }}></i>
-                  </button>
-                </form>
               </div>
             </div>
           </div>
@@ -661,6 +602,8 @@ export default function App() {
       >
         <i className="fa-solid fa-arrow-up"></i>
       </button>
+
+      {showOnboarding && <OnboardingForm onClose={() => setShowOnboarding(false)} />}
     </div>
   );
 }
