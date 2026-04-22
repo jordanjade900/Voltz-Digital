@@ -42,7 +42,6 @@ export default function App() {
   const [activeSection, setActiveSection] = useState('home');
   const [indicatedSection, setIndicatedSection] = useState('home');
   const [isNavVisible, setIsNavVisible] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
   const [portfolioFilter, setPortfolioFilter] = useState('all');
   const [scrollY, setScrollY] = useState(0);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
@@ -162,14 +161,6 @@ export default function App() {
     setIndicatedSection(activeSection);
   };
 
-  // Testimonials Auto-slide
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % 3);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     e.preventDefault();
     const element = document.getElementById(sectionId);
@@ -184,7 +175,7 @@ export default function App() {
   };
 
     const portfolioItems = [
-    { id: 1, category: 'ecommerce', tag: 'E-Commerce', title: 'Jamwood Epoxy', videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-top-view-of-a-carpenter-working-on-a-wooden-plank-41589-preview.mp4', img: 'https://i.postimg.cc/15YTDFC8/image-2026-03-01-231618589.png', desc: 'A premium showcase and e-commerce platform for custom wood and epoxy craftsmanship.' },
+    { id: 1, category: 'ecommerce', tag: 'E-Commerce', title: 'Jamwood Epoxy', videoUrl: 'https://res.cloudinary.com/dad155oxi/video/upload/v1776844908/Jamwood_auto_olx1nc.mp4', img: 'https://i.postimg.cc/15YTDFC8/image-2026-03-01-231618589.png', desc: 'A premium showcase and e-commerce platform for custom wood and epoxy craftsmanship.' },
     { id: 2, category: 'service-provider', tag: 'Event Showcase', title: 'UTech Brand Expo', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://i.postimg.cc/RFDfgvjk/image-2026-03-01-232122830.png', desc: 'A dynamic event platform showcasing international innovation and brand excellence.' },
     { id: 3, category: 'service-provider', tag: 'Event Showcase', title: 'Miss UTech Jamaica', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://res.cloudinary.com/dad155oxi/image/upload/v1774560772/WhatsApp_Image_2026-03-26_at_4.32.31_PM_qm0skt.jpg', desc: 'Official platform for a major international pageant, featuring contestant profiles and event highlights.' },
     { id: 4, category: 'local-business', tag: 'Portfolio', title: 'Island Properties', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', desc: 'A luxury real estate listing platform with advanced search and geolocation.' },
@@ -256,11 +247,11 @@ export default function App() {
         <a href="#home" className={`${activeSection === 'home' ? 'active-link' : ''} ${indicatedSection === 'home' ? 'is-indicated' : ''}`} onClick={(e) => handleNavClick(e, 'home')} onMouseEnter={(e) => handleNavHover(e, 'home')} onMouseLeave={handleNavLeave}>
           <Home size={18} /> <span>Home</span>
         </a>
-        <a href="#portfolio" className={`${activeSection === 'portfolio' ? 'active-link' : ''} ${indicatedSection === 'portfolio' ? 'is-indicated' : ''}`} onClick={(e) => handleNavClick(e, 'portfolio')} onMouseEnter={(e) => handleNavHover(e, 'portfolio')} onMouseLeave={handleNavLeave}>
-          <Briefcase size={18} /> <span>Portfolio</span>
-        </a>
         <a href="#services" className={`${activeSection === 'services' ? 'active-link' : ''} ${indicatedSection === 'services' ? 'is-indicated' : ''}`} onClick={(e) => handleNavClick(e, 'services')} onMouseEnter={(e) => handleNavHover(e, 'services')} onMouseLeave={handleNavLeave}>
           <Bolt size={18} /> <span>Services</span>
+        </a>
+        <a href="#portfolio" className={`${activeSection === 'portfolio' ? 'active-link' : ''} ${indicatedSection === 'portfolio' ? 'is-indicated' : ''}`} onClick={(e) => handleNavClick(e, 'portfolio')} onMouseEnter={(e) => handleNavHover(e, 'portfolio')} onMouseLeave={handleNavLeave}>
+          <Briefcase size={18} /> <span>Portfolio</span>
         </a>
         <a href="#contact" className={`${activeSection === 'contact' ? 'active-link' : ''} ${indicatedSection === 'contact' ? 'is-indicated' : ''}`} onClick={(e) => handleNavClick(e, 'contact')} onMouseEnter={(e) => handleNavHover(e, 'contact')} onMouseLeave={handleNavLeave}>
           <Mail size={18} /> <span>Contact</span>
@@ -313,6 +304,48 @@ export default function App() {
           </div>
         </section>
 
+        {/* Services Section */}
+        <section id="services" className="minimal-section">
+          <div className="container">
+            <div className="section-header fade-up">
+              <h2>Core Capabilities</h2>
+              <p>Everything you need to dominate your market, delivered at lightning speed.</p>
+            </div>
+            <div className="grid grid-3">
+              <div className="minimal-card fade-up delay-1">
+                <Bolt size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
+                <h3>Website Design</h3>
+                <p>Modern, mobile-responsive websites that get you customers and look great on any device. We focus on conversion-driven design.</p>
+              </div>
+              <div className="minimal-card fade-up delay-2">
+                <Target size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
+                <h3>SEO Optimization</h3>
+                <p>Get found on Google and dominate your local market with our proven SEO strategies. Built into the code from day one.</p>
+              </div>
+              <div className="minimal-card fade-up delay-3">
+                <ShieldCheck size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
+                <h3>Website Maintenance</h3>
+                <p>Keep your site fast, secure, and always online with our reliable maintenance plans. We handle the technical details.</p>
+              </div>
+              <div className="minimal-card fade-up delay-1">
+                <ShoppingCart size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
+                <h3>E-commerce</h3>
+                <p>Start selling online with custom online stores built for high conversion rates and seamless checkout experiences.</p>
+              </div>
+              <div className="minimal-card fade-up delay-2">
+                <Pen size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
+                <h3>Copywriting</h3>
+                <p>Persuasive, SEO-optimized content that speaks directly to your target audience and drives them to take action.</p>
+              </div>
+              <div className="minimal-card fade-up delay-3">
+                <TrendingUp size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
+                <h3>Analytics Setup</h3>
+                <p>Track your success with advanced analytics integration, giving you clear insights into your website's performance.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Portfolio Section */}
         <section id="portfolio" className="minimal-section">
           <div className="container">
@@ -359,93 +392,6 @@ export default function App() {
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Services Section */}
-        <section id="services" className="minimal-section">
-          <div className="container">
-            <div className="section-header fade-up">
-              <h2>Core Capabilities</h2>
-              <p>Everything you need to dominate your market, delivered at lightning speed.</p>
-            </div>
-            <div className="grid grid-3">
-              <div className="minimal-card fade-up delay-1">
-                <Bolt size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
-                <h3>Website Design</h3>
-                <p>Modern, mobile-responsive websites that get you customers and look great on any device. We focus on conversion-driven design.</p>
-              </div>
-              <div className="minimal-card fade-up delay-2">
-                <Target size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
-                <h3>SEO Optimization</h3>
-                <p>Get found on Google and dominate your local market with our proven SEO strategies. Built into the code from day one.</p>
-              </div>
-              <div className="minimal-card fade-up delay-3">
-                <ShieldCheck size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
-                <h3>Website Maintenance</h3>
-                <p>Keep your site fast, secure, and always online with our reliable maintenance plans. We handle the technical details.</p>
-              </div>
-              <div className="minimal-card fade-up delay-1">
-                <ShoppingCart size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
-                <h3>E-commerce</h3>
-                <p>Start selling online with custom online stores built for high conversion rates and seamless checkout experiences.</p>
-              </div>
-              <div className="minimal-card fade-up delay-2">
-                <Pen size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
-                <h3>Copywriting</h3>
-                <p>Persuasive, SEO-optimized content that speaks directly to your target audience and drives them to take action.</p>
-              </div>
-              <div className="minimal-card fade-up delay-3">
-                <TrendingUp size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
-                <h3>Analytics Setup</h3>
-                <p>Track your success with advanced analytics integration, giving you clear insights into your website's performance.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials Section */}
-        <section className="minimal-section">
-          <div className="container">
-            <div className="section-header fade-up">
-              <h2>Client Success</h2>
-              <p>Don't just take our word for it.</p>
-            </div>
-            <div className="testimonials-slider fade-up delay-1">
-              <div className="testimonials-track" style={{ transform: `translateX(-${currentSlide * 100}%)`, display: 'flex', transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)' }}>
-                {[
-                  { name: 'John Smith', company: 'ABC Plumbing', img: '11', text: '"Voltz Digital transformed our online presence. We\'re getting 3x more calls now! The speed of delivery was unbelievable."' },
-                  { name: 'Sarah Johnson', company: 'Boutique Owner', img: '5', text: '"Professional, fast, and exactly what we needed. They understood our vision and executed it perfectly in just 4 days."' },
-                  { name: 'Michael Brown', company: 'Fitness Coach', img: '33', text: '"The SEO optimization they did is already paying off. We\'re ranking on the first page for our main keywords!"' }
-                ].map((t, i) => (
-                  <div key={i} className="testimonial-slide" style={{ minWidth: '100%' }}>
-                    <div className="minimal-card">
-                      <div className="stars" style={{ display: 'flex', gap: '4px', color: 'var(--primary)', marginBottom: '20px' }}>
-                        <Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" />
-                      </div>
-                      <p>{t.text}</p>
-                      <div className="testimonial-author">
-                        <img 
-                          src={`https://i.pravatar.cc/150?img=${t.img}`} 
-                          alt={t.name} 
-                          referrerPolicy="no-referrer" 
-                          loading="lazy"
-                        />
-                        <div>
-                          <h4>{t.name}</h4>
-                          <p>{t.company}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="slider-dots">
-                {[0, 1, 2].map(i => (
-                  <span key={i} className={`dot ${currentSlide === i ? 'active' : ''}`} onClick={() => setCurrentSlide(i)}></span>
-                ))}
-              </div>
             </div>
           </div>
         </section>
@@ -709,13 +655,15 @@ export default function App() {
                   <Loader size={40} className="spin" />
                 </div>
               )}
-              {selectedVideo.match(/\.(mp4|webm|ogg)$/) ? (
+              {selectedVideo.match(/\.(mp4|webm|ogg)(\?.*)?$/i) ? (
                 <video 
                   src={selectedVideo} 
                   controls 
                   autoPlay 
-                  onLoadedData={() => setIsVideoLoading(false)}
-                  style={{ width: '100%', height: '100%' }}
+                  playsInline
+                  onCanPlay={() => setIsVideoLoading(false)}
+                  onError={() => setIsVideoLoading(false)}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 />
               ) : (
                 <iframe 
@@ -725,6 +673,7 @@ export default function App() {
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                   allowFullScreen
                   onLoad={() => setIsVideoLoading(false)}
+                  onError={() => setIsVideoLoading(false)}
                 ></iframe>
               )}
             </div>
@@ -753,8 +702,8 @@ export default function App() {
             <h4>Platform</h4>
             <ul className="footer-links">
               <li><a href="#home" onClick={(e) => handleNavClick(e, 'home')}>Home</a></li>
-              <li><a href="#portfolio" onClick={(e) => handleNavClick(e, 'portfolio')}>Portfolio</a></li>
               <li><a href="#services" onClick={(e) => handleNavClick(e, 'services')}>Services</a></li>
+              <li><a href="#portfolio" onClick={(e) => handleNavClick(e, 'portfolio')}>Portfolio</a></li>
               <li><a href="#contact" onClick={(e) => handleNavClick(e, 'contact')}>Contact</a></li>
             </ul>
           </div>

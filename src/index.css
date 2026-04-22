@@ -595,7 +595,8 @@ a { text-decoration: none; color: inherit; }
   padding-bottom: 56.25%; /* 16:9 */
   height: 0;
 }
-.video-container iframe {
+.video-container iframe,
+.video-container video {
   position: absolute;
   top: 0;
   left: 0;
