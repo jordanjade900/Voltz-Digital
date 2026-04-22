@@ -461,7 +461,7 @@ export default function App() {
               {[
                 { name: 'Bronze', price: '$600', desc: 'Perfect for small local businesses', features: ['Custom 3-Page Website', 'Mobile Responsive', 'Basic SEO Setup', 'Contact Form'] },
                 { name: 'Silver', price: '$1000', desc: 'Great for growing companies', popular: true, features: ['Custom 5-Page Website', 'Advanced SEO Optimization', 'Booking/Lead Integration', '1 Month FREE Maintenance'] },
-                { name: 'Gold', price: '$2500', desc: 'Full digital infrastructure', features: ['Full E-commerce Store', 'Payment Gateway Setup', 'Product Uploads (Up to 50)', '2 Months FREE Maintenance'] }
+                { name: 'Gold', price: '$2500', desc: 'Full digital infrastructure', features: ['Custom 10-Page Store', 'Payment Gateway Setup', 'Product Uploads (Up to 50)', '2 Months FREE Maintenance'] }
               ].map((p, i) => (
                 <div key={i} className={`minimal-card pricing-card ${p.popular ? 'popular' : ''} fade-up delay-${i + 1}`}>
                   {p.popular && <div className="popular-badge">MOST POPULAR</div>}
@@ -494,9 +494,9 @@ export default function App() {
                 </thead>
                 <tbody>
                   {[
-                    { name: 'Pages', b: '3', s: '5', g: 'Unlimited' },
+                    { name: 'Pages', b: '3', s: '5', g: '10' },
                     { name: 'Mobile Responsive', b: true, s: true, g: true },
-                    { name: 'Free Maintenance', b: '7 Days Support', s: '1 Month', g: '2 Months' },
+                    { name: 'Free Maintenance', b: false, s: '1 Month', g: '2 Months' },
                     { name: 'SEO Setup', b: 'Basic', s: 'Advanced', g: 'Premium' },
                     { name: 'E-commerce Ready', b: false, s: false, g: true },
                     { name: 'Payment Gateway', b: false, s: 'Booking Only', g: 'Full Checkout' },
