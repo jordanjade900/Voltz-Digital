@@ -175,12 +175,12 @@ export default function App() {
   };
 
     const portfolioItems = [
-    { id: 1, category: 'ecommerce', tag: 'E-Commerce', title: 'Jamwood Epoxy', videoUrl: 'https://res.cloudinary.com/dad155oxi/video/upload/v1776844908/Jamwood_auto_olx1nc.mp4', img: 'https://i.postimg.cc/15YTDFC8/image-2026-03-01-231618589.png', desc: 'A premium showcase and e-commerce platform for custom wood and epoxy craftsmanship.' },
-    { id: 2, category: 'service-provider', tag: 'Event Showcase', title: 'UTech Brand Expo', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://i.postimg.cc/RFDfgvjk/image-2026-03-01-232122830.png', desc: 'A dynamic event platform showcasing international innovation and brand excellence.' },
+    { id: 1, category: 'ecommerce', tag: 'E-Commerce', title: 'Jamwood Epoxy', videoUrl: 'https://res.cloudinary.com/dad155oxi/video/upload/f_auto,q_auto,vc_auto/v1776844908/Jamwood_auto_olx1nc.mp4', img: 'https://i.postimg.cc/15YTDFC8/image-2026-03-01-231618589.png', desc: 'A premium showcase and e-commerce platform for custom wood and epoxy craftsmanship.' },
+    { id: 2, category: 'design-concept', tag: 'Design Concept', title: 'Solas', videoUrl: 'https://res.cloudinary.com/dad155oxi/video/upload/f_auto,q_auto,vc_auto/v1776499122/Solas_FINAL_aidtjp.mov', img: 'https://res.cloudinary.com/dad155oxi/image/upload/v1776847752/WhatsApp_Image_2026-04-22_at_3.48.56_AM_rik6eb.jpg', desc: 'An intelligent AI brand engine designed to automate and elevate visual identity and brand strategy.' },
     { id: 3, category: 'service-provider', tag: 'Event Showcase', title: 'Miss UTech Jamaica', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://res.cloudinary.com/dad155oxi/image/upload/v1774560772/WhatsApp_Image_2026-03-26_at_4.32.31_PM_qm0skt.jpg', desc: 'Official platform for a major international pageant, featuring contestant profiles and event highlights.' },
-    { id: 4, category: 'local-business', tag: 'Portfolio', title: 'Island Properties', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', desc: 'A luxury real estate listing platform with advanced search and geolocation.' },
-    { id: 5, category: 'service-provider', tag: 'Service Provider', title: 'Apex Consulting', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', desc: 'A professional corporate site designed to establish authority and trust for global consulting firms.' },
-    { id: 6, category: 'ecommerce', tag: 'E-Commerce', title: 'Urban Threads', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', desc: 'A sleek, fast-loading online store for a modern global clothing brand.' }
+    { id: 4, category: 'service-provider', tag: 'Landing Page', title: 'Ether Reality', videoUrl: 'https://res.cloudinary.com/dad155oxi/video/upload/f_auto,q_auto,vc_auto/v1776499084/Ether_Reality_FINAL_zz7jxf.mov', img: 'https://res.cloudinary.com/dad155oxi/image/upload/v1776846762/WhatsApp_Image_2026-04-22_at_3.24.05_AM_fhqja8.jpg', desc: 'A cutting-edge landing page designed for the futuristic digital and spatial reality ecosystem.' },
+    { id: 5, category: 'ecommerce', tag: 'E-Commerce', title: 'Artelier', videoUrl: 'https://res.cloudinary.com/dad155oxi/video/upload/f_auto,q_auto,vc_auto/v1776499132/ARTELIER_FINAL_zoqqfy.mov', img: 'https://res.cloudinary.com/dad155oxi/image/upload/v1776846762/WhatsApp_Image_2026-04-22_at_3.30.51_AM_a4uexu.jpg', desc: 'A bespoke makeup e-commerce experience designed for high-end luxury and artistic expression.' },
+    { id: 6, category: 'design-concept', tag: 'Design Concept', title: 'Bushido', videoUrl: 'https://res.cloudinary.com/dad155oxi/video/upload/f_auto,q_auto,vc_auto/v1776847518/BUSHIDO_FINAL_rjxvm4.mov', img: 'https://res.cloudinary.com/dad155oxi/image/upload/v1776846762/WhatsApp_Image_2026-04-22_at_3.31.51_AM_wsjvkk.jpg', desc: 'A dedicated digital space for the ancient art of Japanese swordsmanship and traditional forge craftsmanship.' }
   ];
 
   const filteredPortfolio = portfolioFilter === 'all' 
@@ -354,7 +354,7 @@ export default function App() {
               <p>Explore our latest high-performance builds for modern businesses.</p>
             </div>
             <div className="portfolio-filters fade-up delay-2">
-              {['all', 'local-business', 'restaurant', 'ecommerce', 'service-provider'].map(filter => (
+              {['all', 'design-concept', 'restaurant', 'ecommerce', 'service-provider'].map(filter => (
                 <button 
                   key={filter}
                   className={`filter-btn ${portfolioFilter === filter ? 'active' : ''}`} 
@@ -655,12 +655,16 @@ export default function App() {
                   <Loader size={40} className="spin" />
                 </div>
               )}
-              {selectedVideo.match(/\.(mp4|webm|ogg)(\?.*)?$/i) ? (
+              {selectedVideo.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i) ? (
                 <video 
                   src={selectedVideo} 
                   controls 
+                  controlsList="nodownload"
+                  onContextMenu={(e) => e.preventDefault()}
                   autoPlay 
                   playsInline
+                  preload="auto"
+                  poster={portfolioItems.find(i => i.videoUrl === selectedVideo)?.img}
                   onCanPlay={() => setIsVideoLoading(false)}
                   onError={() => setIsVideoLoading(false)}
                   style={{ width: '100%', height: '100%', objectFit: 'contain' }}
