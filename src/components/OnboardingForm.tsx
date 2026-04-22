@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { CloudUpload, X, ArrowRight, Check } from 'lucide-react';
 
 interface OnboardingFormProps {
   onClose: () => void;
@@ -178,7 +179,7 @@ export default function OnboardingForm({ onClose }: OnboardingFormProps) {
             <div className="input-group">
               <label>Upload Assets (Logo, Team Photos, Banner Images)</label>
               <div className="upload-box">
-                <i className="fa-solid fa-cloud-arrow-up"></i>
+                <CloudUpload size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '12px' }} />
                 <p>Drag and drop or <span>Browse Files</span></p>
                 <input type="file" multiple className="hidden-file-input" />
               </div>
@@ -240,7 +241,7 @@ export default function OnboardingForm({ onClose }: OnboardingFormProps) {
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
       >
         <button className="onboarding-close" onClick={onClose}>
-          <i className="fa-solid fa-xmark"></i>
+          <X size={20} />
         </button>
 
         <div className="onboarding-header">
@@ -264,11 +265,11 @@ export default function OnboardingForm({ onClose }: OnboardingFormProps) {
             <div className="spacer" />
             {step < totalSteps ? (
               <button type="button" className="btn-primary" onClick={nextStep}>
-                Next <i className="fa-solid fa-arrow-right"></i>
+                Next <ArrowRight size={18} />
               </button>
             ) : (
               <button type="submit" className="btn-primary">
-                Submit <i className="fa-solid fa-check"></i>
+                Submit <Check size={18} />
               </button>
             )}
           </div>

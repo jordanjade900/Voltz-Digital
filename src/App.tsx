@@ -1,7 +1,34 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+import { 
+  Home, 
+  Briefcase, 
+  Bolt, 
+  Mail, 
+  Calendar, 
+  Play, 
+  Target, 
+  ShieldCheck, 
+  ShoppingCart, 
+  Pen, 
+  TrendingUp, 
+  Star, 
+  Check, 
+  X, 
+  Loader,
+  ChevronDown, 
+  MessageSquare, 
+  ArrowRight, 
+  Instagram, 
+  Facebook, 
+  Linkedin, 
+  ArrowUp,
+  CreditCard,
+  XCircle
+} from 'lucide-react';
 import firebaseConfig from '../firebase-config.js';
 import Particles from './components/Particles';
 import OnboardingForm from './components/OnboardingForm';
@@ -19,7 +46,9 @@ export default function App() {
   const [portfolioFilter, setPortfolioFilter] = useState('all');
   const [scrollY, setScrollY] = useState(0);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+  const [isVideoLoading, setIsVideoLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const navIndicatorRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
 
@@ -57,24 +86,60 @@ export default function App() {
     const handleScroll = () => {
       setScrollY(window.scrollY);
     };
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      const activeLink = document.querySelector(`.floating-nav a[href="#${activeSection}"]`) as HTMLElement;
+      if (activeLink && navIndicatorRef.current) {
+        navIndicatorRef.current.style.width = `${activeLink.offsetWidth}px`;
+        navIndicatorRef.current.style.left = `${activeLink.offsetLeft}px`;
+      }
+    };
+
+    // Handle escape key for modals
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedVideo(null);
+      }
+    };
+
     window.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('keydown', handleKeyDown);
 
     // Initial nav visibility
-    setTimeout(() => setIsNavVisible(true), 500);
+    setTimeout(() => {
+      setIsNavVisible(true);
+      handleResize(); // Sync indicator on show
+    }, 500);
 
     return () => {
       observer.disconnect();
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [activeSection]);
 
-  // Nav Indicator Logic
+  // Reset loading state when video changes
   useEffect(() => {
-    const activeLink = document.querySelector(`.floating-nav a[href="#${activeSection}"]`) as HTMLElement;
-    if (activeLink && navIndicatorRef.current) {
-      navIndicatorRef.current.style.width = `${activeLink.offsetWidth}px`;
-      navIndicatorRef.current.style.left = `${activeLink.offsetLeft}px`;
+    if (selectedVideo) {
+      setIsVideoLoading(true);
     }
+  }, [selectedVideo]);
+
+  // Nav Indicator Logic - Separated to ensure it runs whenever activeSection changes
+  useEffect(() => {
+    const updateIndicator = () => {
+      const activeLink = document.querySelector(`.floating-nav a[href="#${activeSection}"]`) as HTMLElement;
+      if (activeLink && navIndicatorRef.current) {
+        navIndicatorRef.current.style.width = `${activeLink.offsetWidth}px`;
+        navIndicatorRef.current.style.left = `${activeLink.offsetLeft}px`;
+      }
+    };
+    
+    // Use requestAnimationFrame to ensure DOM is updated
+    requestAnimationFrame(updateIndicator);
     setIndicatedSection(activeSection);
   }, [activeSection]);
 
@@ -114,17 +179,17 @@ export default function App() {
   };
 
   const handleCheckout = (packageType: string) => {
-    // Redirect to Whop checkout link
-    window.location.href = "https://whop.com/voltz-digital/checkout/prod_w4K0Oa0QTDnKx";
+    // Redirect to Whop checkout link in a new tab
+    window.open("https://whop.com/voltz-digital/checkout/prod_w4K0Oa0QTDnKx", "_blank");
   };
 
     const portfolioItems = [
-    { id: 1, category: 'ecommerce', tag: 'E-Commerce', title: 'Jamwood Epoxy', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://i.postimg.cc/15YTDFC8/image-2026-03-01-231618589.png', desc: 'A premium showcase and e-commerce platform for custom wood and epoxy craftsmanship.' },
-    { id: 2, category: 'service-provider', tag: 'Event Showcase', title: 'UTech Brand Expo', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://i.postimg.cc/RFDfgvjk/image-2026-03-01-232122830.png', desc: 'A dynamic event platform showcasing student innovation and brand excellence at UTech, Jamaica.' },
-    { id: 3, category: 'service-provider', tag: 'Event Showcase', title: 'Miss UTech Jamaica', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://res.cloudinary.com/dad155oxi/image/upload/v1774560772/WhatsApp_Image_2026-03-26_at_4.32.31_PM_qm0skt.jpg', desc: 'Official platform for the Miss UTech Jamaica pageant, featuring contestant profiles and event highlights.' },
-    { id: 4, category: 'local-business', tag: 'Local Business', title: 'Island Properties', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', desc: 'A property listing platform with advanced search and filtering.' },
-    { id: 5, category: 'service-provider', tag: 'Service Provider', title: 'Apex Consulting', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', desc: 'A professional corporate site designed to establish authority and trust.' },
-    { id: 6, category: 'ecommerce', tag: 'E-Commerce', title: 'Urban Threads', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', desc: 'A sleek, fast-loading online store for a modern clothing brand.' }
+    { id: 1, category: 'ecommerce', tag: 'E-Commerce', title: 'Jamwood Epoxy', videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-top-view-of-a-carpenter-working-on-a-wooden-plank-41589-preview.mp4', img: 'https://i.postimg.cc/15YTDFC8/image-2026-03-01-231618589.png', desc: 'A premium showcase and e-commerce platform for custom wood and epoxy craftsmanship.' },
+    { id: 2, category: 'service-provider', tag: 'Event Showcase', title: 'UTech Brand Expo', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://i.postimg.cc/RFDfgvjk/image-2026-03-01-232122830.png', desc: 'A dynamic event platform showcasing international innovation and brand excellence.' },
+    { id: 3, category: 'service-provider', tag: 'Event Showcase', title: 'Miss UTech Jamaica', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://res.cloudinary.com/dad155oxi/image/upload/v1774560772/WhatsApp_Image_2026-03-26_at_4.32.31_PM_qm0skt.jpg', desc: 'Official platform for a major international pageant, featuring contestant profiles and event highlights.' },
+    { id: 4, category: 'local-business', tag: 'Portfolio', title: 'Island Properties', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', desc: 'A luxury real estate listing platform with advanced search and geolocation.' },
+    { id: 5, category: 'service-provider', tag: 'Service Provider', title: 'Apex Consulting', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', desc: 'A professional corporate site designed to establish authority and trust for global consulting firms.' },
+    { id: 6, category: 'ecommerce', tag: 'E-Commerce', title: 'Urban Threads', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80', desc: 'A sleek, fast-loading online store for a modern global clothing brand.' }
   ];
 
   const filteredPortfolio = portfolioFilter === 'all' 
@@ -133,10 +198,50 @@ export default function App() {
 
   return (
     <div className="app-container">
+      <Helmet>
+        <title>Voltz Digital | Global Performance Web Design & Digital Infrastructure</title>
+        <meta name="description" content="Voltz Digital delivers high-velocity digital infrastructure and conversion-optimized websites for global brands. Specialists in scalable e-commerce, high-performance landing pages, and rapid web development." />
+        <meta name="keywords" content="global web design agency, high performance websites, conversion optimized design, scalable ecommerce, fast web development, premium digital infrastructure" />
+        <link rel="canonical" href="https://voltzdigital.com" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://voltzdigital.com" />
+        <meta property="og:title" content="Voltz Digital | Global Performance Web Design" />
+        <meta property="og:description" content="High-velocity digital infrastructure for brands that want to scale globally. Custom builds delivered in record time." />
+        <meta property="og:image" content="https://i.postimg.cc/1XL45pYk/Can-u-make-only-the-outline-of-the-lightning-be-wh-delpmaspu-removebg-preview.png" />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://voltzdigital.com" />
+        <meta property="twitter:title" content="Voltz Digital | Global Performance Web Design" />
+        <meta property="twitter:description" content="High-velocity digital infrastructure for brands that want to scale globally. Custom builds delivered in record time." />
+        <meta property="twitter:image" content="https://i.postimg.cc/1XL45pYk/Can-u-make-only-the-outline-of-the-lightning-be-wh-delpmaspu-removebg-preview.png" />
+
+        {/* JSON-LD Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "DigitalDocument",
+            "name": "Voltz Digital",
+            "description": "High-velocity digital infrastructure and conversion-optimized websites for global brands.",
+            "url": "https://voltzdigital.com",
+            "logo": "https://i.postimg.cc/1XL45pYk/Can-u-make-only-the-outline-of-the-lightning-be-wh-delpmaspu-removebg-preview.png",
+            "areaServed": "Worldwide",
+            "serviceType": [
+              "Web Design",
+              "Web Development",
+              "E-commerce Solutions",
+              "Performance Optimization"
+            ]
+          })}
+        </script>
+      </Helmet>
+
       <div className="particles-container">
         <Particles
           particleColors={["#00D4FF", "#ffffff"]}
-          particleCount={250}
+          particleCount={isMobile ? 80 : 250}
           particleSpread={12}
           speed={0.1}
           particleBaseSize={100}
@@ -149,25 +254,27 @@ export default function App() {
       <nav className={`floating-nav ${isNavVisible ? 'visible' : ''}`} ref={navRef}>
         <div className="nav-indicator" ref={navIndicatorRef}></div>
         <a href="#home" className={`${activeSection === 'home' ? 'active-link' : ''} ${indicatedSection === 'home' ? 'is-indicated' : ''}`} onClick={(e) => handleNavClick(e, 'home')} onMouseEnter={(e) => handleNavHover(e, 'home')} onMouseLeave={handleNavLeave}>
-          <i className="fa-solid fa-house"></i> <span>Home</span>
-        </a>
-        <a href="#about" className={`${activeSection === 'about' ? 'active-link' : ''} ${indicatedSection === 'about' ? 'is-indicated' : ''}`} onClick={(e) => handleNavClick(e, 'about')} onMouseEnter={(e) => handleNavHover(e, 'about')} onMouseLeave={handleNavLeave}>
-          <i className="fa-solid fa-user"></i> <span>About</span>
+          <Home size={18} /> <span>Home</span>
         </a>
         <a href="#portfolio" className={`${activeSection === 'portfolio' ? 'active-link' : ''} ${indicatedSection === 'portfolio' ? 'is-indicated' : ''}`} onClick={(e) => handleNavClick(e, 'portfolio')} onMouseEnter={(e) => handleNavHover(e, 'portfolio')} onMouseLeave={handleNavLeave}>
-          <i className="fa-solid fa-briefcase"></i> <span>Portfolio</span>
+          <Briefcase size={18} /> <span>Portfolio</span>
         </a>
         <a href="#services" className={`${activeSection === 'services' ? 'active-link' : ''} ${indicatedSection === 'services' ? 'is-indicated' : ''}`} onClick={(e) => handleNavClick(e, 'services')} onMouseEnter={(e) => handleNavHover(e, 'services')} onMouseLeave={handleNavLeave}>
-          <i className="fa-solid fa-bolt"></i> <span>Services</span>
+          <Bolt size={18} /> <span>Services</span>
         </a>
         <a href="#contact" className={`${activeSection === 'contact' ? 'active-link' : ''} ${indicatedSection === 'contact' ? 'is-indicated' : ''}`} onClick={(e) => handleNavClick(e, 'contact')} onMouseEnter={(e) => handleNavHover(e, 'contact')} onMouseLeave={handleNavLeave}>
-          <i className="fa-solid fa-envelope"></i> <span>Contact</span>
+          <Mail size={18} /> <span>Contact</span>
         </a>
       </nav>
 
       <header className="minimal-header">
         <a href="#home" className="logo" onClick={(e) => handleNavClick(e, 'home')}>
-          <img src="https://i.postimg.cc/1XL45pYk/Can-u-make-only-the-outline-of-the-lightning-be-wh-delpmaspu-removebg-preview.png" alt="Voltz Digital" />
+          <img 
+            src="https://i.postimg.cc/1XL45pYk/Can-u-make-only-the-outline-of-the-lightning-be-wh-delpmaspu-removebg-preview.png" 
+            alt="Voltz Digital" 
+            loading="eager"
+            referrerPolicy="no-referrer"
+          />
         </a>
       </header>
 
@@ -180,7 +287,7 @@ export default function App() {
           <div className="hero-center">
             <h1 className="massive-text fade-up">
               <span className="em-dash"></span> The faster way<br />
-              to <span className="highlight">design, build,</span> and<br />
+              to <span className="highlight">design,</span> <span className="highlight">build,</span> and<br />
               <span className="highlight">scale</span> your brand.
             </h1>
             <div className="hero-action-row fade-up delay-1">
@@ -190,7 +297,7 @@ export default function App() {
               </div>
               <div className="action-line"></div>
               <a href="#contact" className="btn-primary-action" onClick={(e) => handleNavClick(e, 'contact')}>
-                <i className="fa-regular fa-calendar"></i> Book a Demo
+                <Calendar size={20} /> Book a Demo
               </a>
             </div>
             <div className="hero-stats-row fade-up delay-2">
@@ -201,40 +308,6 @@ export default function App() {
               <div className="stat-block">
                 <div className="stat-val highlight">+31.2<span className="stat-unit">%</span></div>
                 <div className="stat-desc"><strong>Performance</strong><br />AI optimized bundle</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* About Section */}
-        <section id="about" className="minimal-section">
-          <div className="container">
-            <div className="section-header fade-up">
-              <h2>About Voltz Digital</h2>
-              <p>We build lightning-fast, high-converting websites for businesses that want to scale.</p>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth > 900 ? '1fr 1fr' : '1fr', gap: '60px', alignItems: 'center' }}>
-              <div className="fade-up delay-1">
-                <h3 style={{ fontSize: '2.5rem', fontWeight: 500, marginBottom: '20px', letterSpacing: '-0.04em' }}>Our Mission</h3>
-                <p style={{ color: 'var(--text-muted)', lineHeight: 1.8, marginBottom: '20px', fontSize: '1.1rem' }}>
-                  At Voltz Digital, we believe that every business deserves a world-class online presence without the months of waiting and exorbitant agency fees.
-                </p>
-                <p style={{ color: 'var(--text-muted)', lineHeight: 1.8, marginBottom: '30px', fontSize: '1.1rem' }}>
-                  Based in Kingston, Jamaica, we follow a general blueprint of a two-week turnaround for most projects. Depending on the complexity of your requirements, production typically takes between one to two weeks, with simpler websites often delivered in under a week.
-                </p>
-                <div style={{ display: 'flex', gap: '40px' }}>
-                  <div>
-                    <div style={{ fontSize: '2.5rem', color: 'var(--primary)', fontWeight: 500 }}>50+</div>
-                    <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Projects Delivered</div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '2.5rem', color: 'var(--primary)', fontWeight: 500 }}>1-2 Weeks</div>
-                    <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Average Turnaround</div>
-                  </div>
-                </div>
-              </div>
-              <div className="fade-up delay-2" style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
-                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Our Team" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} referrerPolicy="no-referrer" />
               </div>
             </div>
           </div>
@@ -267,9 +340,15 @@ export default function App() {
                   style={{ cursor: 'pointer' }}
                 >
                   <div className="portfolio-img-wrapper">
-                    <img src={item.img} alt={item.title} className="portfolio-img" referrerPolicy="no-referrer" />
+                    <img 
+                      src={item.img} 
+                      alt={item.title} 
+                      className="portfolio-img" 
+                      referrerPolicy="no-referrer" 
+                      loading="lazy"
+                    />
                     <div className="portfolio-overlay">
-                      <i className="fa-solid fa-play"></i>
+                      <Play size={40} />
                       <span>Watch Presentation</span>
                     </div>
                   </div>
@@ -293,32 +372,32 @@ export default function App() {
             </div>
             <div className="grid grid-3">
               <div className="minimal-card fade-up delay-1">
-                <i className="fa-solid fa-bolt"></i>
+                <Bolt size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
                 <h3>Website Design</h3>
                 <p>Modern, mobile-responsive websites that get you customers and look great on any device. We focus on conversion-driven design.</p>
               </div>
               <div className="minimal-card fade-up delay-2">
-                <i className="fa-solid fa-bullseye"></i>
+                <Target size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
                 <h3>SEO Optimization</h3>
                 <p>Get found on Google and dominate your local market with our proven SEO strategies. Built into the code from day one.</p>
               </div>
               <div className="minimal-card fade-up delay-3">
-                <i className="fa-solid fa-shield-halved"></i>
+                <ShieldCheck size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
                 <h3>Website Maintenance</h3>
                 <p>Keep your site fast, secure, and always online with our reliable maintenance plans. We handle the technical details.</p>
               </div>
               <div className="minimal-card fade-up delay-1">
-                <i className="fa-solid fa-cart-shopping"></i>
+                <ShoppingCart size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
                 <h3>E-commerce</h3>
                 <p>Start selling online with custom online stores built for high conversion rates and seamless checkout experiences.</p>
               </div>
               <div className="minimal-card fade-up delay-2">
-                <i className="fa-solid fa-pen-nib"></i>
+                <Pen size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
                 <h3>Copywriting</h3>
                 <p>Persuasive, SEO-optimized content that speaks directly to your target audience and drives them to take action.</p>
               </div>
               <div className="minimal-card fade-up delay-3">
-                <i className="fa-solid fa-chart-line"></i>
+                <TrendingUp size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
                 <h3>Analytics Setup</h3>
                 <p>Track your success with advanced analytics integration, giving you clear insights into your website's performance.</p>
               </div>
@@ -342,12 +421,17 @@ export default function App() {
                 ].map((t, i) => (
                   <div key={i} className="testimonial-slide" style={{ minWidth: '100%' }}>
                     <div className="minimal-card">
-                      <div className="stars">
-                        <i className="fa-solid fa-star"></i><i className="fa-solid fa-star"></i><i className="fa-solid fa-star"></i><i className="fa-solid fa-star"></i><i className="fa-solid fa-star"></i>
+                      <div className="stars" style={{ display: 'flex', gap: '4px', color: 'var(--primary)', marginBottom: '20px' }}>
+                        <Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" /><Star size={14} fill="currentColor" />
                       </div>
                       <p>{t.text}</p>
                       <div className="testimonial-author">
-                        <img src={`https://i.pravatar.cc/150?img=${t.img}`} alt={t.name} referrerPolicy="no-referrer" />
+                        <img 
+                          src={`https://i.pravatar.cc/150?img=${t.img}`} 
+                          alt={t.name} 
+                          referrerPolicy="no-referrer" 
+                          loading="lazy"
+                        />
                         <div>
                           <h4>{t.name}</h4>
                           <p>{t.company}</p>
@@ -376,8 +460,8 @@ export default function App() {
             <div className="grid grid-3">
               {[
                 { name: 'Bronze', price: '$600', desc: 'Perfect for small local businesses', features: ['Custom 3-Page Website', 'Mobile Responsive', 'Basic SEO Setup', 'Contact Form'] },
-                { name: 'Silver', price: '$1000', desc: 'Great for growing service companies', popular: true, features: ['Custom 5-Page Website', 'Advanced SEO Optimization', 'Booking/Lead Integration', '1 Month Free Maintenance'] },
-                { name: 'Gold', price: '$2500', desc: 'Full e-commerce & advanced features', features: ['Full E-commerce Store', 'Payment Gateway Setup', 'Product Uploads (Up to 50)', 'Premium Support'] }
+                { name: 'Silver', price: '$1000', desc: 'Great for growing companies', popular: true, features: ['Custom 5-Page Website', 'Advanced SEO Optimization', 'Booking/Lead Integration', '1 Month FREE Maintenance'] },
+                { name: 'Gold', price: '$2500', desc: 'Full digital infrastructure', features: ['Full E-commerce Store', 'Payment Gateway Setup', 'Product Uploads (Up to 50)', '2 Months FREE Maintenance'] }
               ].map((p, i) => (
                 <div key={i} className={`minimal-card pricing-card ${p.popular ? 'popular' : ''} fade-up delay-${i + 1}`}>
                   {p.popular && <div className="popular-badge">MOST POPULAR</div>}
@@ -386,7 +470,7 @@ export default function App() {
                   <div className="pricing-price" style={p.popular ? { color: 'var(--primary)' } : {}}>{p.price}</div>
                   <ul className="pricing-features">
                     {p.features.map((f, j) => (
-                      <li key={j}><i className="fa-solid fa-check"></i> {f}</li>
+                      <li key={j}><Check size={16} /> {f}</li>
                     ))}
                   </ul>
                   <button onClick={() => handleCheckout(p.name)} className={p.popular ? "btn-primary-action btn-block" : "btn-outline btn-block"}>
@@ -394,6 +478,90 @@ export default function App() {
                   </button>
                 </div>
               ))}
+            </div>
+
+            {/* Comparison Table */}
+            <div className="comparison-container fade-up delay-4">
+              <h3 style={{ textAlign: 'center', marginBottom: '40px', fontSize: '1.8rem', fontWeight: 500 }}>Compare Packages</h3>
+              <table className="comparison-table">
+                <thead>
+                  <tr>
+                    <th>Feature</th>
+                    <th>Bronze</th>
+                    <th className="highlight-col">Silver</th>
+                    <th>Gold</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { name: 'Pages', b: '3', s: '5', g: 'Unlimited' },
+                    { name: 'Mobile Responsive', b: true, s: true, g: true },
+                    { name: 'Free Maintenance', b: '7 Days Support', s: '1 Month', g: '2 Months' },
+                    { name: 'SEO Setup', b: 'Basic', s: 'Advanced', g: 'Premium' },
+                    { name: 'E-commerce Ready', b: false, s: false, g: true },
+                    { name: 'Payment Gateway', b: false, s: 'Booking Only', g: 'Full Checkout' },
+                    { name: 'Product Uploads', b: false, s: false, g: 'Up to 50' },
+                    { name: 'Priority Support', b: false, s: true, g: true },
+                  ].map((row, i) => (
+                    <tr key={i}>
+                      <td>{row.name}</td>
+                      <td>{typeof row.b === 'boolean' ? (row.b ? <Check size={18} className="check-icon" /> : <X size={16} className="x-icon" />) : row.b}</td>
+                      <td className="highlight-col">{typeof row.s === 'boolean' ? (row.s ? <Check size={18} className="check-icon" /> : <X size={16} className="x-icon" />) : row.s}</td>
+                      <td>{typeof row.g === 'boolean' ? (row.g ? <Check size={18} className="check-icon" /> : <X size={16} className="x-icon" />) : row.g}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Maintenance Pricing */}
+            <div className="maintenance-section fade-up delay-1">
+              <div className="section-header" style={{ marginBottom: '50px' }}>
+                <h2 style={{ fontSize: '2rem' }}>Maintenance Infrastructure</h2>
+                <p>Ensure your digital assets remain high-velocity, secure, and always online.</p>
+              </div>
+              <div className="grid grid-2" style={{ maxWidth: '900px', margin: '0 auto', gap: '30px' }}>
+                {[
+                  { name: 'Pulse', price: '$49/mo', desc: 'Essential security & performance', features: ['Monthly Backups', 'Uptime Monitoring', 'Security Patches', 'Standard Support'] },
+                  { name: 'Supercharge', price: '$99/mo', desc: 'Aggressive growth & optimization', popular: true, features: ['Weekly Backups', 'Speed Optimization', 'SEO Performance Reports', 'Priority WhatsApp Support'] }
+                ].map((p, i) => (
+                  <div key={i} className={`minimal-card pricing-card ${p.popular ? 'popular' : ''}`}>
+                    {p.popular && <div className="popular-badge">RECOMMENDED</div>}
+                    <h3 style={{ fontSize: '1.4rem' }}>{p.name}</h3>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{p.desc}</p>
+                    <div className="pricing-price" style={p.popular ? { color: 'var(--primary)', fontSize: '2.8rem' } : { fontSize: '2.8rem' }}>{p.price}</div>
+                    <ul className="pricing-features">
+                      {p.features.map((f, j) => (
+                        <li key={j}><Check size={16} style={{ color: p.popular ? 'var(--primary)' : 'inherit' }} /> {f}</li>
+                      ))}
+                    </ul>
+                    <button onClick={() => window.open("https://whop.com/voltz-digital/checkout/prod_w4K0Oa0QTDnKx", "_blank")} className={p.popular ? "btn-primary-action btn-block" : "btn-outline btn-block"}>
+                      Subscribe Now
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="fade-up delay-4" style={{ textAlign: 'center', marginTop: '60px' }}>
+              <div style={{ 
+                background: 'rgba(255,255,255,0.03)', 
+                padding: '20px', 
+                borderRadius: '12px', 
+                border: '1px solid var(--border-color)',
+                display: 'inline-block',
+                maxWidth: '100%'
+              }}>
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '15px' }}>
+                  💳 Secure Checkout via <strong>WHOP</strong> | Credit Cards & PayPal Accepted | 256-bit SSL Encryption | 100% Money-Back Guarantee
+                </p>
+                <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', opacity: 0.7 }}>
+                  <CreditCard size={24} />
+                  <Facebook size={24} />
+                  <Instagram size={24} />
+                  <Linkedin size={24} />
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -407,6 +575,7 @@ export default function App() {
             </div>
             <div className="faq-container fade-up delay-1">
               {[
+                { q: 'How do I pay?', a: 'We use WHOP for global secure checkout. You can pay with any major credit card, Apple Pay, or PayPal. Your payment is protected with bank-level encryption. Clients in specific regions can also request alternative payment methods - contact us for details.' },
                 { q: 'What is included in the website packages?', a: 'All packages include a custom-designed, mobile-responsive website, basic SEO optimization, and a contact form. Higher-tier packages include additional features like booking systems, e-commerce capabilities, and professional copywriting.' },
                 { q: 'Do you provide hosting and domain names?', a: 'Our Silver and Gold packages include 1 year of premium hosting. Domain names are typically purchased separately by the client to ensure full ownership, but we can assist you with the process.' },
                 { q: 'How long does it take to build a website?', a: 'Delivery times vary by package. The Bronze package takes about 5 days, Silver takes 7 days, and Gold takes 10 days. This timeline starts once we have received all necessary content and branding materials from you.' },
@@ -429,7 +598,7 @@ export default function App() {
                     }
                   }}>
                     {faq.q}
-                    <i className="fa-solid fa-chevron-down"></i>
+                    <ChevronDown size={20} className="faq-icon" />
                   </button>
                   <div className="faq-answer">
                     <p>{faq.a}</p>
@@ -454,7 +623,7 @@ export default function App() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', marginBottom: '40px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(0, 212, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontSize: '1.2rem' }}>
-                      <i className="fa-solid fa-envelope"></i>
+                      <Mail size={20} />
                     </div>
                     <div>
                       <h4 style={{ margin: '0 0 5px 0', fontWeight: 500 }}>Email Us</h4>
@@ -463,7 +632,7 @@ export default function App() {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(0, 212, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontSize: '1.2rem' }}>
-                      <i className="fa-brands fa-whatsapp"></i>
+                      <MessageSquare size={20} />
                     </div>
                     <div>
                       <h4 style={{ margin: '0 0 5px 0', fontWeight: 500 }}>WhatsApp</h4>
@@ -480,9 +649,9 @@ export default function App() {
                   <button 
                     onClick={() => setShowOnboarding(true)}
                     className="btn-outline"
-                    style={{ fontSize: '0.9rem', padding: '10px 20px' }}
+                    style={{ fontSize: '0.9rem', padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '10px' }}
                   >
-                    Start Onboarding <i className="fa-solid fa-arrow-right" style={{ marginLeft: '8px' }}></i>
+                    Start Onboarding <ArrowRight size={16} />
                   </button>
                 </div>
               </div>
@@ -502,21 +671,21 @@ export default function App() {
                       <div style={{ fontWeight: 600, color: 'var(--primary)', fontSize: '1.2rem' }}>02</div>
                       <div>
                         <h4 style={{ marginBottom: '5px' }}>Secure Checkout</h4>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Complete your transaction securely via Whop.</p>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Complete your transaction securely via WHOP. You'll receive an instant confirmation email.</p>
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '20px' }}>
                       <div style={{ fontWeight: 600, color: 'var(--primary)', fontSize: '1.2rem' }}>03</div>
                       <div>
                         <h4 style={{ marginBottom: '5px' }}>Detailed Onboarding</h4>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Fill out our comprehensive form to guide our build.</p>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Fill out our comprehensive form. We'll contact you within 4 hours to start the project.</p>
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '20px' }}>
                       <div style={{ fontWeight: 600, color: 'var(--primary)', fontSize: '1.2rem' }}>04</div>
                       <div>
-                        <h4 style={{ marginBottom: '5px' }}>Fast Delivery</h4>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Get your high-performance site in just 7-10 days.</p>
+                        <h4 style={{ marginBottom: '5px' }}>Rapid Delivery</h4>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Watch your high-performance site go live in just 7-10 days.</p>
                       </div>
                     </div>
                   </div>
@@ -532,16 +701,32 @@ export default function App() {
         <div className="video-modal" onClick={() => setSelectedVideo(null)}>
           <div className="video-modal-content" onClick={e => e.stopPropagation()}>
             <button className="close-modal" onClick={() => setSelectedVideo(null)}>
-              <i className="fa-solid fa-xmark"></i>
+              <X size={24} />
             </button>
             <div className="video-container">
-              <iframe 
-                src={`${selectedVideo}?autoplay=1`}
-                title="Project Presentation"
-                frameBorder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowFullScreen
-              ></iframe>
+              {isVideoLoading && (
+                <div className="video-loader">
+                  <Loader size={40} className="spin" />
+                </div>
+              )}
+              {selectedVideo.match(/\.(mp4|webm|ogg)$/) ? (
+                <video 
+                  src={selectedVideo} 
+                  controls 
+                  autoPlay 
+                  onLoadedData={() => setIsVideoLoading(false)}
+                  style={{ width: '100%', height: '100%' }}
+                />
+              ) : (
+                <iframe 
+                  src={`${selectedVideo}${selectedVideo.includes('?') ? '&' : '?'}autoplay=1`}
+                  title="Project Presentation"
+                  frameBorder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowFullScreen
+                  onLoad={() => setIsVideoLoading(false)}
+                ></iframe>
+              )}
             </div>
           </div>
         </div>
@@ -550,21 +735,27 @@ export default function App() {
       <footer className="minimal-footer">
         <div className="footer-grid">
           <div className="footer-col">
-            <img src="https://i.postimg.cc/1XL45pYk/Can-u-make-only-the-outline-of-the-lightning-be-wh-delpmaspu-removebg-preview.png" alt="Voltz Digital" style={{ height: '180px', marginBottom: '20px', borderRadius: '8px' }} />
+            <img 
+              src="https://i.postimg.cc/1XL45pYk/Can-u-make-only-the-outline-of-the-lightning-be-wh-delpmaspu-removebg-preview.png" 
+              alt="Voltz Digital" 
+              style={{ height: '180px', marginBottom: '20px', borderRadius: '8px' }} 
+              loading="lazy"
+              referrerPolicy="no-referrer"
+            />
             <p>Lightning-Fast Websites for Growing Businesses. You innovate, we automate.</p>
-            <div className="social-icons">
-              <a href="#"><i className="fa-brands fa-instagram"></i></a>
-              <a href="#"><i className="fa-brands fa-facebook-f"></i></a>
-              <a href="#"><i className="fa-brands fa-linkedin-in"></i></a>
+            <div className="social-icons" style={{ display: 'flex', gap: '15px', marginTop: '20px' }}>
+              <a href="#"><Instagram size={20} /></a>
+              <a href="#"><Facebook size={20} /></a>
+              <a href="#"><Linkedin size={20} /></a>
             </div>
           </div>
           <div className="footer-col">
             <h4>Platform</h4>
             <ul className="footer-links">
               <li><a href="#home" onClick={(e) => handleNavClick(e, 'home')}>Home</a></li>
-              <li><a href="#about" onClick={(e) => handleNavClick(e, 'about')}>About</a></li>
               <li><a href="#portfolio" onClick={(e) => handleNavClick(e, 'portfolio')}>Portfolio</a></li>
               <li><a href="#services" onClick={(e) => handleNavClick(e, 'services')}>Services</a></li>
+              <li><a href="#contact" onClick={(e) => handleNavClick(e, 'contact')}>Contact</a></li>
             </ul>
           </div>
           <div className="footer-col">
@@ -599,8 +790,9 @@ export default function App() {
         className={`scroll-to-top ${scrollY > 500 ? 'visible' : ''}`} 
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         aria-label="Scroll to top"
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
-        <i className="fa-solid fa-arrow-up"></i>
+        <ArrowUp size={20} />
       </button>
 
       {showOnboarding && <OnboardingForm onClose={() => setShowOnboarding(false)} />}
