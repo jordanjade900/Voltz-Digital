@@ -40,7 +40,6 @@ const auth = getAuth(app);
 
 export default function App() {
   const [activeSection, setActiveSection] = useState('home');
-  const [indicatedSection, setIndicatedSection] = useState('home');
   const [isNavVisible, setIsNavVisible] = useState(false);
   const [portfolioFilter, setPortfolioFilter] = useState('all');
   const [scrollY, setScrollY] = useState(0);
@@ -50,7 +49,8 @@ export default function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const navIndicatorRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
-
+  const isAutoScrolling = useRef(false);
+  const autoScrollTimeout = useRef<number | null>(null);
 
   // Scroll Animations & Active Section Tracking
   useEffect(() => {
@@ -64,15 +64,15 @@ export default function App() {
 
     const observerOptions = {
       root: null,
-      rootMargin: '0px',
-      threshold: 0.1
+      rootMargin: '-20% 0px -70% 0px',
+      threshold: 0
     };
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('in-view');
-          if (entry.target.id) {
+          if (entry.target.tagName === 'SECTION' && entry.target.id && !isAutoScrolling.current) {
             setActiveSection(entry.target.id);
           }
         }
@@ -83,7 +83,20 @@ export default function App() {
     animatedElements.forEach(el => observer.observe(el));
 
     const handleScroll = () => {
-      setScrollY(window.scrollY);
+      const top = window.scrollY;
+      setScrollY(top);
+      
+      if (isAutoScrolling.current) {
+        if (autoScrollTimeout.current) window.clearTimeout(autoScrollTimeout.current);
+        autoScrollTimeout.current = window.setTimeout(() => {
+          isAutoScrolling.current = false;
+        }, 150);
+      }
+      
+      // Force home active when near top
+      if (top < 100 && !isAutoScrolling.current) {
+        setActiveSection('home');
+      }
     };
 
     const handleResize = () => {
@@ -139,39 +152,26 @@ export default function App() {
     
     // Use requestAnimationFrame to ensure DOM is updated
     requestAnimationFrame(updateIndicator);
-    setIndicatedSection(activeSection);
   }, [activeSection]);
-
-  const handleNavHover = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
-    const link = e.currentTarget;
-    if (navIndicatorRef.current) {
-      navIndicatorRef.current.style.width = `${link.offsetWidth}px`;
-      navIndicatorRef.current.style.left = `${link.offsetLeft}px`;
-      navIndicatorRef.current.style.opacity = '1';
-    }
-    setIndicatedSection(sectionId);
-  };
-
-  const handleNavLeave = () => {
-    const activeLink = document.querySelector(`.floating-nav a[href="#${activeSection}"]`) as HTMLElement;
-    if (activeLink && navIndicatorRef.current) {
-      navIndicatorRef.current.style.width = `${activeLink.offsetWidth}px`;
-      navIndicatorRef.current.style.left = `${activeLink.offsetLeft}px`;
-    }
-    setIndicatedSection(activeSection);
-  };
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     e.preventDefault();
     const element = document.getElementById(sectionId);
     if (element) {
+      isAutoScrolling.current = true;
+      setActiveSection(sectionId);
       element.scrollIntoView({ behavior: 'smooth' });
+      
+      if (autoScrollTimeout.current) window.clearTimeout(autoScrollTimeout.current);
+      autoScrollTimeout.current = window.setTimeout(() => {
+        isAutoScrolling.current = false;
+      }, 2000); // Fallback timeout if scroll events don't fire or stop early
     }
   };
 
   const handleCheckout = (packageType: string) => {
     // Redirect to Whop checkout link in a new tab
-    window.open("https://whop.com/voltz-digital/checkout/prod_w4K0Oa0QTDnKx", "_blank");
+    window.open("https://whop.com/voltz-digital/checkout/prod_w4K0Oa0QTDnKx?direct=true", "_blank");
   };
 
     const portfolioItems = [
@@ -191,7 +191,7 @@ export default function App() {
     <div className="app-container">
       <Helmet>
         <title>Voltz Digital | Global Performance Web Design & Digital Infrastructure</title>
-        <meta name="description" content="Voltz Digital delivers high-velocity digital infrastructure and conversion-optimized websites for global brands. Specialists in scalable e-commerce, high-performance landing pages, and rapid web development." />
+        <meta name="description" content="Voltz Digital delivers high-velocity digital infrastructure and conversion-optimized websites for global brands. Specialists in high-performance landing pages, advanced animations, and rapid web development." />
         <meta name="keywords" content="global web design agency, high performance websites, conversion optimized design, scalable ecommerce, fast web development, premium digital infrastructure" />
         <link rel="canonical" href="https://voltzdigital.com" />
         
@@ -244,16 +244,20 @@ export default function App() {
 
       <nav className={`floating-nav ${isNavVisible ? 'visible' : ''}`} ref={navRef}>
         <div className="nav-indicator" ref={navIndicatorRef}></div>
-        <a href="#home" className={`${activeSection === 'home' ? 'active-link' : ''} ${indicatedSection === 'home' ? 'is-indicated' : ''}`} onClick={(e) => handleNavClick(e, 'home')} onMouseEnter={(e) => handleNavHover(e, 'home')} onMouseLeave={handleNavLeave}>
+        <a href="#home" className={`${activeSection === 'home' ? 'active-link' : ''}`} onClick={(e) => handleNavClick(e, 'home')}>
           <Home size={18} /> <span>Home</span>
         </a>
-        <a href="#services" className={`${activeSection === 'services' ? 'active-link' : ''} ${indicatedSection === 'services' ? 'is-indicated' : ''}`} onClick={(e) => handleNavClick(e, 'services')} onMouseEnter={(e) => handleNavHover(e, 'services')} onMouseLeave={handleNavLeave}>
+        <a href="#about" className={`${activeSection === 'about' ? 'active-link' : ''}`} onClick={(e) => handleNavClick(e, 'about')}>
+          <Star size={18} /> <span>About</span>
+        </a>
+
+        <a href="#pricing" className={`${activeSection === 'pricing' ? 'active-link' : ''}`} onClick={(e) => handleNavClick(e, 'pricing')}>
           <Bolt size={18} /> <span>Services</span>
         </a>
-        <a href="#portfolio" className={`${activeSection === 'portfolio' ? 'active-link' : ''} ${indicatedSection === 'portfolio' ? 'is-indicated' : ''}`} onClick={(e) => handleNavClick(e, 'portfolio')} onMouseEnter={(e) => handleNavHover(e, 'portfolio')} onMouseLeave={handleNavLeave}>
+        <a href="#portfolio" className={`${activeSection === 'portfolio' ? 'active-link' : ''}`} onClick={(e) => handleNavClick(e, 'portfolio')}>
           <Briefcase size={18} /> <span>Portfolio</span>
         </a>
-        <a href="#contact" className={`${activeSection === 'contact' ? 'active-link' : ''} ${indicatedSection === 'contact' ? 'is-indicated' : ''}`} onClick={(e) => handleNavClick(e, 'contact')} onMouseEnter={(e) => handleNavHover(e, 'contact')} onMouseLeave={handleNavLeave}>
+        <a href="#contact" className={`${activeSection === 'contact' ? 'active-link' : ''}`} onClick={(e) => handleNavClick(e, 'contact')}>
           <Mail size={18} /> <span>Contact</span>
         </a>
       </nav>
@@ -283,12 +287,12 @@ export default function App() {
             </h1>
             <div className="hero-action-row fade-up delay-1">
               <div className="action-text">
-                <h3>See Platform in action</h3>
-                <p>Join our guided tour and explore<br />all features live.</p>
+                <h3>Premium Deployment</h3>
+                <p>Transform<br />your business today.</p>
               </div>
               <div className="action-line"></div>
-              <a href="#contact" className="btn-primary-action" onClick={(e) => handleNavClick(e, 'contact')}>
-                <Calendar size={20} /> Book a Demo
+              <a href="#pricing" className="btn-primary-action" onClick={(e) => handleNavClick(e, 'pricing')}>
+                <ArrowRight size={20} /> Start Your Build
               </a>
             </div>
             <div className="hero-stats-row fade-up delay-2">
@@ -304,8 +308,8 @@ export default function App() {
           </div>
         </section>
 
-        {/* Services Section */}
-        <section id="services" className="minimal-section">
+        {/* About Section (Core Capabilities) */}
+        <section id="about" className="minimal-section">
           <div className="container">
             <div className="section-header fade-up">
               <h2>Core Capabilities</h2>
@@ -328,16 +332,11 @@ export default function App() {
                 <p>Keep your site fast, secure, and always online with our reliable maintenance plans. We handle the technical details.</p>
               </div>
               <div className="minimal-card fade-up delay-1">
-                <ShoppingCart size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
-                <h3>E-commerce</h3>
-                <p>Start selling online with custom online stores built for high conversion rates and seamless checkout experiences.</p>
-              </div>
-              <div className="minimal-card fade-up delay-2">
                 <Pen size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
                 <h3>Copywriting</h3>
                 <p>Persuasive, SEO-optimized content that speaks directly to your target audience and drives them to take action.</p>
               </div>
-              <div className="minimal-card fade-up delay-3">
+              <div className="minimal-card fade-up delay-2">
                 <TrendingUp size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
                 <h3>Analytics Setup</h3>
                 <p>Track your success with advanced analytics integration, giving you clear insights into your website's performance.</p>
@@ -346,58 +345,57 @@ export default function App() {
           </div>
         </section>
 
-        {/* Portfolio Section */}
-        <section id="portfolio" className="minimal-section">
+        {/* How It Works Section */}
+        <section id="how-it-works" className="minimal-section" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
           <div className="container">
-            <div className="section-header fade-up">
-              <h2>Recent Deployments</h2>
-              <p>Explore our latest high-performance builds for modern businesses.</p>
-            </div>
-            <div className="portfolio-filters fade-up delay-2">
-              {['all', 'design-concept', 'restaurant', 'ecommerce', 'service-provider'].map(filter => (
-                <button 
-                  key={filter}
-                  className={`filter-btn ${portfolioFilter === filter ? 'active' : ''}`} 
-                  onClick={() => setPortfolioFilter(filter)}
-                >
-                  {filter.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                </button>
-              ))}
-            </div>
-            <div className="grid grid-3">
-              {filteredPortfolio.map((item, idx) => (
-                <div 
-                  key={item.id} 
-                  className={`portfolio-card fade-up delay-${(idx % 3) + 1} in-view`}
-                  onClick={() => setSelectedVideo(item.videoUrl)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div className="portfolio-img-wrapper">
-                    <img 
-                      src={item.img} 
-                      alt={item.title} 
-                      className="portfolio-img" 
-                      referrerPolicy="no-referrer" 
-                      loading="lazy"
-                    />
-                    <div className="portfolio-overlay">
-                      <Play size={40} />
-                      <span>Watch Presentation</span>
+            <div className="how-it-works-grid">
+              <div className="fade-up how-it-works-header">
+                <h2 style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 500, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '20px' }}>
+                  Streamlined<br />
+                  <span style={{ color: 'var(--primary)' }}>Delivery</span>
+                </h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', lineHeight: 1.6, maxWidth: '400px' }}>
+                  We've optimized our development pipeline to get your high-performance infrastructure live in record time with zero technical friction.
+                </p>
+              </div>
+              
+              <div className="how-it-works-steps">
+                {[
+                  { num: '01', title: 'Choose a Package', desc: 'Select the plan that fits your business needs from our transparent pricing tiers. No hidden fees.' },
+                  { num: '02', title: 'Secure Checkout', desc: "Complete your transaction via WHOP. You'll receive an instant confirmation and project receipt." },
+                  { num: '03', title: 'Detailed Onboarding', desc: 'Fill out our brief technical form. Our lead engineer will contact you within 4 hours to sync.' },
+                  { num: '04', title: 'Rapid Delivery', desc: 'Watch your site go live in just 7-14 days. We handle all the deployment and technical setup.' }
+                ].map((step, i) => (
+                  <div 
+                    key={i} 
+                    className={`minimal-card how-it-works-step fade-up delay-${i % 4 + 1}`} 
+                    onMouseEnter={(e) => { 
+                      e.currentTarget.style.borderLeftColor = 'var(--primary)'; 
+                      e.currentTarget.style.transform = 'translateX(10px)'; 
+                    }} 
+                    onMouseLeave={(e) => { 
+                      e.currentTarget.style.borderLeftColor = 'rgba(0, 212, 255, 0.2)'; 
+                      e.currentTarget.style.transform = 'translateX(0)'; 
+                    }}
+                  >
+                    <div className="how-it-works-step-num">
+                      {step.num}
+                    </div>
+                    <div>
+                      <h4 style={{ fontSize: '1.5rem', marginBottom: '12px', fontWeight: 500 }}>{step.title}</h4>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6, margin: 0 }}>
+                        {step.desc}
+                      </p>
                     </div>
                   </div>
-                  <div className="portfolio-content">
-                    <span className="portfolio-tag">{item.tag}</span>
-                    <h3>{item.title}</h3>
-                    <p>{item.desc}</p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </section>
 
         {/* Pricing Section */}
-        <section className="minimal-section">
+        <section id="pricing" className="minimal-section">
           <div className="container">
             <div className="section-header fade-up">
               <h2>Transparent Pricing</h2>
@@ -405,9 +403,9 @@ export default function App() {
             </div>
             <div className="grid grid-3">
               {[
-                { name: 'Bronze', price: '$600', desc: 'Perfect for small local businesses', features: ['Custom 3-Page Website', 'Mobile Responsive', 'Basic SEO Setup', 'Contact Form'] },
-                { name: 'Silver', price: '$1000', desc: 'Great for growing companies', popular: true, features: ['Custom 5-Page Website', 'Advanced SEO Optimization', 'Booking/Lead Integration', '1 Month FREE Maintenance'] },
-                { name: 'Gold', price: '$2500', desc: 'Full digital infrastructure', features: ['Custom 10-Page Store', 'Payment Gateway Setup', 'Product Uploads (Up to 50)', '2 Months FREE Maintenance'] }
+                { name: 'Bronze', price: '$600', desc: 'Perfect for small local businesses', features: ['Static Custom Design', 'Mobile Responsive', 'Basic SEO Setup', 'Contact Form'] },
+                { name: 'Silver', price: '$1000', desc: 'Great for growing companies', popular: true, features: ['Animated Custom Design', 'Advanced SEO Optimization', 'Performance Optimization', '1 Month FREE Maintenance'] },
+                { name: 'Gold', price: '$2500', desc: 'Full digital infrastructure', features: ['Advanced Motion Suite', 'Premium Infrastructure', 'Priority Technical Support', '2 Months FREE Maintenance'] }
               ].map((p, i) => (
                 <div key={i} className={`minimal-card pricing-card ${p.popular ? 'popular' : ''} fade-up delay-${i + 1}`}>
                   {p.popular && <div className="popular-badge">MOST POPULAR</div>}
@@ -440,13 +438,12 @@ export default function App() {
                 </thead>
                 <tbody>
                   {[
-                    { name: 'Pages', b: '3', s: '5', g: '10' },
+                    { name: 'Website Type', b: 'Static', s: 'Animated', g: 'Animated' },
                     { name: 'Mobile Responsive', b: true, s: true, g: true },
-                    { name: 'Free Maintenance', b: false, s: '1 Month', g: '2 Months' },
+                    { name: 'Performance Optimization', b: true, s: true, g: true },
                     { name: 'SEO Setup', b: 'Basic', s: 'Advanced', g: 'Premium' },
-                    { name: 'E-commerce Ready', b: false, s: false, g: true },
-                    { name: 'Payment Gateway', b: false, s: 'Booking Only', g: 'Full Checkout' },
-                    { name: 'Product Uploads', b: false, s: false, g: 'Up to 50' },
+                    { name: 'Advanced Motion', b: false, s: false, g: true },
+                    { name: 'Free Maintenance', b: false, s: '1 Month', g: '2 Months' },
                     { name: 'Priority Support', b: false, s: true, g: true },
                   ].map((row, i) => (
                     <tr key={i}>
@@ -468,8 +465,8 @@ export default function App() {
               </div>
               <div className="grid grid-2" style={{ maxWidth: '900px', margin: '0 auto', gap: '30px' }}>
                 {[
-                  { name: 'Pulse', price: '$49/mo', desc: 'Essential security & performance', features: ['Monthly Backups', 'Uptime Monitoring', 'Security Patches', 'Standard Support'] },
-                  { name: 'Supercharge', price: '$99/mo', desc: 'Aggressive growth & optimization', popular: true, features: ['Weekly Backups', 'Speed Optimization', 'SEO Performance Reports', 'Priority WhatsApp Support'] }
+                  { name: 'Pulse', price: '$99/mo', desc: 'Essential security & performance', features: ['Monthly Backups', 'Uptime Monitoring', 'Security Patches', 'Standard Support'] },
+                  { name: 'Supercharge', price: '$169/mo', desc: 'Aggressive growth & optimization', popular: true, features: ['Weekly Backups', 'Speed Optimization', 'SEO Performance Reports', 'Priority WhatsApp Support'] }
                 ].map((p, i) => (
                   <div key={i} className={`minimal-card pricing-card ${p.popular ? 'popular' : ''}`}>
                     {p.popular && <div className="popular-badge">RECOMMENDED</div>}
@@ -481,7 +478,7 @@ export default function App() {
                         <li key={j}><Check size={16} style={{ color: p.popular ? 'var(--primary)' : 'inherit' }} /> {f}</li>
                       ))}
                     </ul>
-                    <button onClick={() => window.open("https://whop.com/voltz-digital/checkout/prod_w4K0Oa0QTDnKx", "_blank")} className={p.popular ? "btn-primary-action btn-block" : "btn-outline btn-block"}>
+                    <button onClick={() => handleCheckout(p.name)} className={p.popular ? "btn-primary-action btn-block" : "btn-outline btn-block"}>
                       Subscribe Now
                     </button>
                   </div>
@@ -512,6 +509,46 @@ export default function App() {
           </div>
         </section>
 
+        {/* Portfolio Section */}
+        <section id="portfolio" className="minimal-section">
+          <div className="container">
+            <div className="section-header fade-up">
+              <h2>Recent Deployments</h2>
+              <p>Explore our latest high-performance builds for modern businesses.</p>
+            </div>
+
+            <div className="grid grid-3">
+              {filteredPortfolio.map((item, idx) => (
+                <div 
+                  key={item.id} 
+                  className={`portfolio-card fade-up delay-${(idx % 3) + 1} in-view`}
+                  onClick={() => setSelectedVideo(item.videoUrl)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="portfolio-img-wrapper">
+                    <img 
+                      src={item.img} 
+                      alt={item.title} 
+                      className="portfolio-img" 
+                      referrerPolicy="no-referrer" 
+                      loading="lazy"
+                    />
+                    <div className="portfolio-overlay">
+                      <Play size={40} />
+                      <span>Watch Presentation</span>
+                    </div>
+                  </div>
+                  <div className="portfolio-content">
+                    <span className="portfolio-tag">{item.tag}</span>
+                    <h3>{item.title}</h3>
+                    <p>{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* FAQ Section */}
         <section className="minimal-section">
           <div className="container">
@@ -522,9 +559,9 @@ export default function App() {
             <div className="faq-container fade-up delay-1">
               {[
                 { q: 'How do I pay?', a: 'We use WHOP for global secure checkout. You can pay with any major credit card, Apple Pay, or PayPal. Your payment is protected with bank-level encryption. Clients in specific regions can also request alternative payment methods - contact us for details.' },
-                { q: 'What is included in the website packages?', a: 'All packages include a custom-designed, mobile-responsive website, basic SEO optimization, and a contact form. Higher-tier packages include additional features like booking systems, e-commerce capabilities, and professional copywriting.' },
+                { q: 'What is included in the website packages?', a: 'All packages include a custom-designed, mobile-responsive website, basic SEO optimization, and a contact form. Higher-tier packages include additional features like booking systems, advanced motion suites, and professional copywriting.' },
                 { q: 'Do you provide hosting and domain names?', a: 'Our Silver and Gold packages include 1 year of premium hosting. Domain names are typically purchased separately by the client to ensure full ownership, but we can assist you with the process.' },
-                { q: 'How long does it take to build a website?', a: 'Delivery times vary by package. The Bronze package takes about 5 days, Silver takes 7 days, and Gold takes 10 days. This timeline starts once we have received all necessary content and branding materials from you.' },
+                { q: 'How long does it take to build a website?', a: 'Delivery times vary by package. The Bronze package takes about 5 days, Silver takes 7 days, and Gold takes 14 days. This timeline starts once we have received all necessary content and branding materials from you.' },
                 { q: 'What happens after the support period ends?', a: 'After your included support period (7, 30, or 90 days), we offer ongoing monthly maintenance plans to keep your site secure, updated, and performing at its best. You can also choose to manage the site yourself.' }
               ].map((faq, i) => (
                 <div key={i} className="faq-item">
@@ -563,10 +600,10 @@ export default function App() {
               <p>Ready to upgrade your online presence? Drop us a line or start an order to begin onboarding.</p>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth > 900 ? '1fr 1fr' : '1fr', gap: '60px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '60px', maxWidth: '800px', margin: '0 auto' }}>
               <div className="fade-up delay-1">
-                <h3 style={{ fontSize: '1.8rem', fontWeight: 500, marginBottom: '30px', letterSpacing: '-0.02em' }}>Contact Information</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', marginBottom: '40px' }}>
+                <h3 style={{ fontSize: '1.8rem', fontWeight: 500, marginBottom: '30px', letterSpacing: '-0.02em', textAlign: 'center' }}>Contact Information</h3>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '40px', marginBottom: '40px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(0, 212, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontSize: '1.2rem' }}>
                       <Mail size={20} />
@@ -582,57 +619,11 @@ export default function App() {
                     </div>
                     <div>
                       <h4 style={{ margin: '0 0 5px 0', fontWeight: 500 }}>WhatsApp</h4>
-                      <p style={{ margin: 0, color: 'var(--text-muted)' }}>+1 (876) XXX-XXXX</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="minimal-card" style={{ padding: '30px', background: 'rgba(0, 212, 255, 0.03)', border: '1px solid rgba(0, 212, 255, 0.1)' }}>
-                  <h4 style={{ marginBottom: '15px', color: 'var(--primary)' }}>Already placed an order?</h4>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '20px' }}>
-                    If you've already completed your payment, you can launch the onboarding form to provide your details.
-                  </p>
-                  <button 
-                    onClick={() => setShowOnboarding(true)}
-                    className="btn-outline"
-                    style={{ fontSize: '0.9rem', padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '10px' }}
-                  >
-                    Start Onboarding <ArrowRight size={16} />
-                  </button>
-                </div>
-              </div>
-
-              <div className="fade-up delay-2">
-                <div className="minimal-card" style={{ padding: '40px' }}>
-                  <h3 style={{ fontSize: '1.5rem', marginBottom: '20px', fontWeight: 500 }}>How it Works</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-                    <div style={{ display: 'flex', gap: '20px' }}>
-                      <div style={{ fontWeight: 600, color: 'var(--primary)', fontSize: '1.2rem' }}>01</div>
-                      <div>
-                        <h4 style={{ marginBottom: '5px' }}>Choose a Package</h4>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Select the plan that fits your business needs above.</p>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '20px' }}>
-                      <div style={{ fontWeight: 600, color: 'var(--primary)', fontSize: '1.2rem' }}>02</div>
-                      <div>
-                        <h4 style={{ marginBottom: '5px' }}>Secure Checkout</h4>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Complete your transaction securely via WHOP. You'll receive an instant confirmation email.</p>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '20px' }}>
-                      <div style={{ fontWeight: 600, color: 'var(--primary)', fontSize: '1.2rem' }}>03</div>
-                      <div>
-                        <h4 style={{ marginBottom: '5px' }}>Detailed Onboarding</h4>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Fill out our comprehensive form. We'll contact you within 4 hours to start the project.</p>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '20px' }}>
-                      <div style={{ fontWeight: 600, color: 'var(--primary)', fontSize: '1.2rem' }}>04</div>
-                      <div>
-                        <h4 style={{ marginBottom: '5px' }}>Rapid Delivery</h4>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Watch your high-performance site go live in just 7-10 days.</p>
-                      </div>
+                      <p style={{ margin: 0, color: 'var(--text-muted)' }}>
+                        <a href="https://wa.me/18765471161" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>
+                          +1 (876) 547-1161
+                        </a>
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -706,7 +697,8 @@ export default function App() {
             <h4>Platform</h4>
             <ul className="footer-links">
               <li><a href="#home" onClick={(e) => handleNavClick(e, 'home')}>Home</a></li>
-              <li><a href="#services" onClick={(e) => handleNavClick(e, 'services')}>Services</a></li>
+              <li><a href="#about" onClick={(e) => handleNavClick(e, 'about')}>About</a></li>
+              <li><a href="#pricing" onClick={(e) => handleNavClick(e, 'pricing')}>Services</a></li>
               <li><a href="#portfolio" onClick={(e) => handleNavClick(e, 'portfolio')}>Portfolio</a></li>
               <li><a href="#contact" onClick={(e) => handleNavClick(e, 'contact')}>Contact</a></li>
             </ul>
@@ -714,10 +706,9 @@ export default function App() {
           <div className="footer-col">
             <h4>Capabilities</h4>
             <ul className="footer-links">
-              <li><a href="#services" onClick={(e) => handleNavClick(e, 'services')}>Rapid Deployment</a></li>
-              <li><a href="#services" onClick={(e) => handleNavClick(e, 'services')}>Technical SEO</a></li>
-              <li><a href="#services" onClick={(e) => handleNavClick(e, 'services')}>Managed Infrastructure</a></li>
-              <li><a href="#services" onClick={(e) => handleNavClick(e, 'services')}>E-commerce</a></li>
+              <li><a href="#about" onClick={(e) => handleNavClick(e, 'about')}>Rapid Deployment</a></li>
+              <li><a href="#about" onClick={(e) => handleNavClick(e, 'about')}>Technical SEO</a></li>
+              <li><a href="#about" onClick={(e) => handleNavClick(e, 'about')}>Managed Infrastructure</a></li>
             </ul>
           </div>
           <div className="footer-col">
@@ -725,7 +716,7 @@ export default function App() {
             <ul className="footer-links">
               <li><a href="#contact" onClick={(e) => handleNavClick(e, 'contact')}>Contact Us</a></li>
               <li><a href="mailto:hello@voltzdigital.com">hello@voltzdigital.com</a></li>
-              <li><a href="tel:+18760000000">+1 (876) XXX-XXXX</a></li>
+              <li><a href="https://wa.me/18765471161" target="_blank" rel="noopener noreferrer">+1 (876) 547-1161</a></li>
               <li><a href="#">Kingston, Jamaica</a></li>
             </ul>
           </div>
