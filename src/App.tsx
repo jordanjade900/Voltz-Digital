@@ -1,8 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
 import { 
   Home, 
   Briefcase, 
@@ -29,14 +26,9 @@ import {
   CreditCard,
   XCircle
 } from 'lucide-react';
-import firebaseConfig from '../firebase-config.js';
-import Particles from './components/Particles';
-import OnboardingForm from './components/OnboardingForm';
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+const Particles = lazy(() => import('./components/Particles'));
+const OnboardingForm = lazy(() => import('./components/OnboardingForm'));
 
 export default function App() {
   const [activeSection, setActiveSection] = useState('home');
@@ -152,7 +144,16 @@ export default function App() {
     
     // Use requestAnimationFrame to ensure DOM is updated
     requestAnimationFrame(updateIndicator);
-  }, [activeSection]);
+    
+    // Also update after fonts are ready
+    if (document.fonts) {
+      document.fonts.ready.then(updateIndicator);
+    }
+    
+    // Fallback delay to ensure it catches late CSS loads
+    const tm = setTimeout(updateIndicator, 300);
+    return () => clearTimeout(tm);
+  }, [activeSection, isMobile]);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     e.preventDefault();
@@ -176,11 +177,11 @@ export default function App() {
 
     const portfolioItems = [
     { id: 1, category: 'ecommerce', tag: 'E-Commerce', title: 'Jamwood Epoxy', videoUrl: 'https://res.cloudinary.com/dad155oxi/video/upload/f_auto,q_auto,vc_auto/v1776844908/Jamwood_auto_olx1nc.mp4', img: 'https://i.postimg.cc/15YTDFC8/image-2026-03-01-231618589.png', desc: 'A premium showcase and e-commerce platform for custom wood and epoxy craftsmanship.' },
-    { id: 2, category: 'design-concept', tag: 'Design Concept', title: 'Solas', videoUrl: 'https://res.cloudinary.com/dad155oxi/video/upload/f_auto,q_auto,vc_auto/v1776499122/Solas_FINAL_aidtjp.mov', img: 'https://res.cloudinary.com/dad155oxi/image/upload/v1776847752/WhatsApp_Image_2026-04-22_at_3.48.56_AM_rik6eb.jpg', desc: 'An intelligent AI brand engine designed to automate and elevate visual identity and brand strategy.' },
-    { id: 3, category: 'service-provider', tag: 'Event Showcase', title: 'Miss UTech Jamaica', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://res.cloudinary.com/dad155oxi/image/upload/v1774560772/WhatsApp_Image_2026-03-26_at_4.32.31_PM_qm0skt.jpg', desc: 'Official platform for a major international pageant, featuring contestant profiles and event highlights.' },
-    { id: 4, category: 'service-provider', tag: 'Landing Page', title: 'Ether Reality', videoUrl: 'https://res.cloudinary.com/dad155oxi/video/upload/f_auto,q_auto,vc_auto/v1776499084/Ether_Reality_FINAL_zz7jxf.mov', img: 'https://res.cloudinary.com/dad155oxi/image/upload/v1776846762/WhatsApp_Image_2026-04-22_at_3.24.05_AM_fhqja8.jpg', desc: 'A cutting-edge landing page designed for the futuristic digital and spatial reality ecosystem.' },
-    { id: 5, category: 'ecommerce', tag: 'E-Commerce', title: 'Artelier', videoUrl: 'https://res.cloudinary.com/dad155oxi/video/upload/f_auto,q_auto,vc_auto/v1776499132/ARTELIER_FINAL_zoqqfy.mov', img: 'https://res.cloudinary.com/dad155oxi/image/upload/v1776846762/WhatsApp_Image_2026-04-22_at_3.30.51_AM_a4uexu.jpg', desc: 'A bespoke makeup e-commerce experience designed for high-end luxury and artistic expression.' },
-    { id: 6, category: 'design-concept', tag: 'Design Concept', title: 'Bushido', videoUrl: 'https://res.cloudinary.com/dad155oxi/video/upload/f_auto,q_auto,vc_auto/v1776847518/BUSHIDO_FINAL_rjxvm4.mov', img: 'https://res.cloudinary.com/dad155oxi/image/upload/v1776846762/WhatsApp_Image_2026-04-22_at_3.31.51_AM_wsjvkk.jpg', desc: 'A dedicated digital space for the ancient art of Japanese swordsmanship and traditional forge craftsmanship.' }
+    { id: 2, category: 'design-concept', tag: 'Design Concept', title: 'Solas', videoUrl: 'https://res.cloudinary.com/dad155oxi/video/upload/f_auto,q_auto,vc_auto/v1776499122/Solas_FINAL_aidtjp.mov', img: 'https://res.cloudinary.com/dad155oxi/image/upload/f_auto,q_auto,w_600/v1776847752/WhatsApp_Image_2026-04-22_at_3.48.56_AM_rik6eb.jpg', desc: 'An intelligent AI brand engine designed to automate and elevate visual identity and brand strategy.' },
+    { id: 3, category: 'service-provider', tag: 'Event Showcase', title: 'Miss UTech Jamaica', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', img: 'https://res.cloudinary.com/dad155oxi/image/upload/f_auto,q_auto,w_600/v1774560772/WhatsApp_Image_2026-03-26_at_4.32.31_PM_qm0skt.jpg', desc: 'Official platform for a major international pageant, featuring contestant profiles and event highlights.' },
+    { id: 4, category: 'service-provider', tag: 'Landing Page', title: 'Ether Reality', videoUrl: 'https://res.cloudinary.com/dad155oxi/video/upload/f_auto,q_auto,vc_auto/v1776499084/Ether_Reality_FINAL_zz7jxf.mov', img: 'https://res.cloudinary.com/dad155oxi/image/upload/f_auto,q_auto,w_600/v1776846762/WhatsApp_Image_2026-04-22_at_3.24.05_AM_fhqja8.jpg', desc: 'A cutting-edge landing page designed for the futuristic digital and spatial reality ecosystem.' },
+    { id: 5, category: 'ecommerce', tag: 'E-Commerce', title: 'Artelier', videoUrl: 'https://res.cloudinary.com/dad155oxi/video/upload/f_auto,q_auto,vc_auto/v1776499132/ARTELIER_FINAL_zoqqfy.mov', img: 'https://res.cloudinary.com/dad155oxi/image/upload/f_auto,q_auto,w_600/v1776846762/WhatsApp_Image_2026-04-22_at_3.30.51_AM_a4uexu.jpg', desc: 'A bespoke makeup e-commerce experience designed for high-end luxury and artistic expression.' },
+    { id: 6, category: 'design-concept', tag: 'Design Concept', title: 'Bushido', videoUrl: 'https://res.cloudinary.com/dad155oxi/video/upload/f_auto,q_auto,vc_auto/v1776847518/BUSHIDO_FINAL_rjxvm4.mov', img: 'https://res.cloudinary.com/dad155oxi/image/upload/f_auto,q_auto,w_600/v1776846762/WhatsApp_Image_2026-04-22_at_3.31.51_AM_wsjvkk.jpg', desc: 'A dedicated digital space for the ancient art of Japanese swordsmanship and traditional forge craftsmanship.' }
   ];
 
   const filteredPortfolio = portfolioFilter === 'all' 
@@ -230,16 +231,18 @@ export default function App() {
       </Helmet>
 
       <div className="particles-container">
-        <Particles
-          particleColors={["#00D4FF", "#ffffff"]}
-          particleCount={isMobile ? 80 : 250}
-          particleSpread={12}
-          speed={0.1}
-          particleBaseSize={100}
-          moveParticlesOnHover={false}
-          alphaParticles={false}
-          disableRotation={false}
-        />
+        <Suspense fallback={null}>
+          <Particles
+            particleColors={["#00D4FF", "#ffffff"]}
+            particleCount={isMobile ? 80 : 250}
+            particleSpread={12}
+            speed={0.1}
+            particleBaseSize={100}
+            moveParticlesOnHover={false}
+            alphaParticles={false}
+            disableRotation={false}
+          />
+        </Suspense>
       </div>
 
       <nav className={`floating-nav ${isNavVisible ? 'visible' : ''}`} ref={navRef}>
@@ -739,7 +742,7 @@ export default function App() {
         <ArrowUp size={20} />
       </button>
 
-      {showOnboarding && <OnboardingForm onClose={() => setShowOnboarding(false)} />}
+      {showOnboarding && <Suspense fallback={null}><OnboardingForm onClose={() => setShowOnboarding(false)} /></Suspense>}
     </div>
   );
 }
