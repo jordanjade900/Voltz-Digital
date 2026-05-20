@@ -495,7 +495,7 @@ export default function App() {
               <div className="grid grid-2" style={{ maxWidth: '900px', margin: '0 auto', gap: '30px' }}>
                 {[
                   { name: 'Pulse', price: '$99/mo', desc: 'Essential security & performance', features: ['Monthly Backups', 'Uptime Monitoring', 'Security Patches', 'Standard Support'] },
-                  { name: 'Supercharge', price: '$169/mo', desc: 'Aggressive growth & optimization', popular: true, features: ['Weekly Backups', 'Speed Optimization', 'SEO Performance Reports', 'Priority WhatsApp Support'] }
+                  { name: 'Supercharge', price: '$169/mo', desc: 'Aggressive growth & optimization', popular: true, features: ['Weekly Backups', 'Speed Optimization', 'SEO Performance Reports', 'Priority Support'] }
                 ].map((p, i) => (
                   <div key={i} className={`minimal-card pricing-card ${p.popular ? 'popular' : ''}`}>
                     {p.popular && <div className="popular-badge">RECOMMENDED</div>}
@@ -654,18 +654,9 @@ export default function App() {
                     </div>
                     <div>
                       <h4 style={{ margin: '0 0 5px 0', fontWeight: 500 }}>Email Us</h4>
-                      <p style={{ margin: 0, color: 'var(--text-muted)' }}>info@voltzdigitalja.com</p>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(0, 212, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontSize: '1.2rem' }}>
-                      <MessageSquare size={20} />
-                    </div>
-                    <div>
-                      <h4 style={{ margin: '0 0 5px 0', fontWeight: 500 }}>WhatsApp</h4>
                       <p style={{ margin: 0, color: 'var(--text-muted)' }}>
-                        <a href="https://wa.me/18765471161" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>
-                          +1 (876) 547-1161
+                        <a href="mailto:info@voltzdigitalja.com" style={{ color: 'inherit', textDecoration: 'none' }}>
+                          info@voltzdigitalja.com
                         </a>
                       </p>
                     </div>
@@ -760,7 +751,6 @@ export default function App() {
             <ul className="footer-links">
               <li><a href="#contact" onClick={(e) => handleNavClick(e, 'contact')}>Contact Us</a></li>
               <li><a href="mailto:info@voltzdigitalja.com">info@voltzdigitalja.com</a></li>
-              <li><a href="https://wa.me/18765471161" target="_blank" rel="noopener noreferrer">+1 (876) 547-1161</a></li>
               <li><a href="#">Kingston, Jamaica</a></li>
             </ul>
           </div>
