@@ -44,7 +44,40 @@ export default function App() {
   const isAutoScrolling = useRef(false);
   const autoScrollTimeout = useRef<number | null>(null);
 
-  // Scroll Animations & Active Section Tracking
+  // Scroll-based Reveal Animations for Fade-up Elements
+  useEffect(() => {
+    const animationObserverOptions = {
+      root: null,
+      rootMargin: '0px 0px -50px 0px', // triggers animation slightly before elements enter screen for smooth experience
+      threshold: 0
+    };
+
+    const animationObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          animationObserver.unobserve(entry.target);
+        }
+      });
+    }, animationObserverOptions);
+
+    const animatedElements = document.querySelectorAll('.fade-up');
+    animatedElements.forEach(el => animationObserver.observe(el));
+
+    // Force above-the-fold Hero elements to load instantly without waiting for scroll
+    const forceAboveFold = () => {
+      document.querySelectorAll('.hero-new .fade-up').forEach(el => {
+        el.classList.add('in-view');
+      });
+    };
+    requestAnimationFrame(forceAboveFold);
+
+    return () => {
+      animationObserver.disconnect();
+    };
+  }, []);
+
+  // Section Tracking & Global Event Listeners
   useEffect(() => {
     // Check for onboarding trigger in URL
     const params = new URLSearchParams(window.location.search);
@@ -54,25 +87,24 @@ export default function App() {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    const observerOptions = {
+    const sectionObserverOptions = {
       root: null,
-      rootMargin: '-20% 0px -70% 0px',
+      rootMargin: '-20% 0px -70% 0px', // Strict margin for reliable nav menu highlight matching
       threshold: 0
     };
 
-    const observer = new IntersectionObserver((entries) => {
+    const sectionObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          entry.target.classList.add('in-view');
           if (entry.target.tagName === 'SECTION' && entry.target.id && !isAutoScrolling.current) {
             setActiveSection(entry.target.id);
           }
         }
       });
-    }, observerOptions);
+    }, sectionObserverOptions);
 
-    const animatedElements = document.querySelectorAll('.fade-up, section');
-    animatedElements.forEach(el => observer.observe(el));
+    const sections = document.querySelectorAll('section');
+    sections.forEach(el => sectionObserver.observe(el));
 
     const handleScroll = () => {
       const top = window.scrollY;
@@ -93,11 +125,6 @@ export default function App() {
 
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
-      const activeLink = document.querySelector(`.floating-nav a[href="#${activeSection}"]`) as HTMLElement;
-      if (activeLink && navIndicatorRef.current) {
-        navIndicatorRef.current.style.width = `${activeLink.offsetWidth}px`;
-        navIndicatorRef.current.style.left = `${activeLink.offsetLeft}px`;
-      }
     };
 
     // Handle escape key for modals
@@ -114,16 +141,15 @@ export default function App() {
     // Initial nav visibility
     setTimeout(() => {
       setIsNavVisible(true);
-      handleResize(); // Sync indicator on show
     }, 500);
 
     return () => {
-      observer.disconnect();
+      sectionObserver.disconnect();
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [activeSection]);
+  }, []);
 
   // Reset loading state when video changes
   useEffect(() => {
@@ -535,6 +561,21 @@ export default function App() {
                       className="portfolio-img" 
                       referrerPolicy="no-referrer" 
                       loading="lazy"
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        if (!target.dataset.fallbackTried) {
+                          target.dataset.fallbackTried = 'true';
+                          if (item.videoUrl) {
+                            // Extract a high-performance, optimized thumbnail frame directly from the Cloudinary video asset
+                            const posterUrl = item.videoUrl
+                              .replace(/\.(mp4|mov|webm)$/i, '.jpg')
+                              .replace('f_auto,q_auto,vc_auto', 'f_auto,q_auto,w_600');
+                            target.src = posterUrl;
+                          } else {
+                            target.src = 'https://res.cloudinary.com/dad155oxi/image/upload/f_auto,q_auto,w_600/v1776846762/WhatsApp_Image_2026-04-22_at_3.24.05_AM_fhqja8.jpg';
+                          }
+                        }
+                      }}
                     />
                     <div className="portfolio-overlay">
                       <Play size={40} />
@@ -613,7 +654,7 @@ export default function App() {
                     </div>
                     <div>
                       <h4 style={{ margin: '0 0 5px 0', fontWeight: 500 }}>Email Us</h4>
-                      <p style={{ margin: 0, color: 'var(--text-muted)' }}>hello@voltzdigital.com</p>
+                      <p style={{ margin: 0, color: 'var(--text-muted)' }}>hello@voltzdigitalja.com</p>
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
@@ -718,7 +759,7 @@ export default function App() {
             <h4>Connect</h4>
             <ul className="footer-links">
               <li><a href="#contact" onClick={(e) => handleNavClick(e, 'contact')}>Contact Us</a></li>
-              <li><a href="mailto:hello@voltzdigital.com">hello@voltzdigital.com</a></li>
+              <li><a href="mailto:hello@voltzdigitalja.com">hello@voltzdigitalja.com</a></li>
               <li><a href="https://wa.me/18765471161" target="_blank" rel="noopener noreferrer">+1 (876) 547-1161</a></li>
               <li><a href="#">Kingston, Jamaica</a></li>
             </ul>
