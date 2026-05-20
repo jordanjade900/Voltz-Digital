@@ -654,7 +654,7 @@ export default function App() {
                     </div>
                     <div>
                       <h4 style={{ margin: '0 0 5px 0', fontWeight: 500 }}>Email Us</h4>
-                      <p style={{ margin: 0, color: 'var(--text-muted)' }}>hello@voltzdigitalja.com</p>
+                      <p style={{ margin: 0, color: 'var(--text-muted)' }}>info@voltzdigitalja.com</p>
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
@@ -759,7 +759,7 @@ export default function App() {
             <h4>Connect</h4>
             <ul className="footer-links">
               <li><a href="#contact" onClick={(e) => handleNavClick(e, 'contact')}>Contact Us</a></li>
-              <li><a href="mailto:hello@voltzdigitalja.com">hello@voltzdigitalja.com</a></li>
+              <li><a href="mailto:info@voltzdigitalja.com">info@voltzdigitalja.com</a></li>
               <li><a href="https://wa.me/18765471161" target="_blank" rel="noopener noreferrer">+1 (876) 547-1161</a></li>
               <li><a href="#">Kingston, Jamaica</a></li>
             </ul>
