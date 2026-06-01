@@ -1,0 +1,94 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net (default deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global helpers
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    function incoming() { 
+      return request.resource.data; 
+    }
+    function existing() { 
+      return resource.data; 
+    }
+    function isSignedIn() { 
+      return request.auth != null; 
+    }
+    function isAdmin() { 
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        || request.auth.token.email == 'admin@voltzdigital.com'
+      ); 
+    }
+
+    // Admins List (Only lookups allowed, no writing from client SDK)
+    match /admins/{adminId} {
+      allow get: if isSignedIn() && isValidId(adminId);
+      allow list, write: if false;
+    }
+
+    // Onboarding Submissions
+    match /onboarding/{submissionId} {
+      allow create: if isValidId(submissionId) 
+                     && isValidSubmission(incoming());
+                     
+      allow read, list, delete: if isAdmin();
+      
+      allow update: if isAdmin() 
+                     && isValidSubmissionUpdate(incoming())
+                     && incoming().diff(existing()).affectedKeys().hasOnly(['status']);
+    }
+
+    // Standalone Validation Blueprints (Anti-Update-Gap / Shadow Write Protection)
+    function isValidSubmission(data) {
+      return data.keys().hasAll(['id', 'submittedAt', 'status', 'data'])
+          && data.keys().size() == 4
+          && data.id is string
+          && data.id.size() <= 100
+          && data.id.size() > 0
+          && data.submittedAt is string
+          && data.submittedAt.size() <= 50
+          && data.status == 'new'
+          && data.data is map
+          && isValidFormData(data.data);
+    }
+
+    function isValidSubmissionUpdate(data) {
+      return data.keys().hasAll(['id', 'submittedAt', 'status', 'data'])
+          && data.keys().size() == 4
+          && data.id is string
+          && data.submittedAt is string
+          && data.status in ['new', 'reviewed', 'in_progress', 'completed']
+          && data.data is map;
+    }
+
+    function isValidFormData(form) {
+      return form.businessName is string && form.businessName.size() <= 256 && form.businessName.size() > 0
+          && form.ownerFirstName is string && form.ownerFirstName.size() <= 100 && form.ownerFirstName.size() > 0
+          && form.ownerLastName is string && form.ownerLastName.size() <= 100 && form.ownerLastName.size() > 0
+          && form.personalEmail is string && form.personalEmail.size() <= 256 && form.personalEmail.size() > 0
+          && form.personalNumber is string && form.personalNumber.size() <= 50 && form.personalNumber.size() > 0
+          && (!('businessEmail' in form) || (form.businessEmail is string && form.businessEmail.size() <= 256))
+          && (!('businessNumber' in form) || (form.businessNumber is string && form.businessNumber.size() <= 50))
+          && (!('businessDescription' in form) || (form.businessDescription is string && form.businessDescription.size() <= 5000))
+          && (!('whyChooseUs' in form) || (form.whyChooseUs is string && form.whyChooseUs.size() <= 5000))
+          && (!('specialSauce' in form) || (form.specialSauce is string && form.specialSauce.size() <= 5000))
+          && (!('servicesOffered' in form) || (form.servicesOffered is string && form.servicesOffered.size() <= 5000))
+          && (!('specialOffers' in form) || (form.specialOffers is string && form.specialOffers.size() <= 5000))
+          && (!('companyHistory' in form) || (form.companyHistory is string && form.companyHistory.size() <= 5000))
+          && (!('competitors' in form) || (form.competitors is string && form.competitors.size() <= 5000))
+          && (!('ownerVision' in form) || (form.ownerVision is string && form.ownerVision.size() <= 5000))
+          && (!('faq' in form) || (form.faq is string && form.faq.size() <= 5000))
+          && (!('websiteAddress' in form) || (form.websiteAddress is string && form.websiteAddress.size() <= 500))
+          && (!('adminUsername' in form) || (form.adminUsername is string && form.adminUsername.size() <= 256))
+          && (!('adminLoginCode' in form) || (form.adminLoginCode is string && form.adminLoginCode.size() <= 256))
+          && (!('additionalNotes' in form) || (form.additionalNotes is string && form.additionalNotes.size() <= 5000));
+    }
+  }
+}

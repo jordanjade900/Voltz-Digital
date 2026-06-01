@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CloudUpload, X, ArrowRight, Check, AlertCircle } from 'lucide-react';
+import { doc, setDoc } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 
 interface OnboardingFormProps {
   onClose: () => void;
@@ -629,21 +631,24 @@ export default function OnboardingForm({ onClose, isPreview = false }: Onboardin
       return;
     }
     try {
-      const response = await fetch('/api/onboarding', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ formData }),
-      });
-      if (response.ok) {
-        setIsSubmitted(true);
-      } else {
-        alert('There was a slight issue submitting your onboarding details. Please try again or download a copy of your info.');
-      }
+      const docId = `sub-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      const submissionRef = doc(db, 'onboarding', docId);
+      const newSubmission = {
+        id: docId,
+        submittedAt: new Date().toISOString(),
+        status: "new" as const,
+        data: formData
+      };
+      await setDoc(submissionRef, newSubmission);
+      setIsSubmitted(true);
     } catch (err) {
       console.error('Submission error:', err);
-      alert('A network issue occurred. Your onboarding data has been saved to your browser session.');
+      try {
+        handleFirestoreError(err, OperationType.WRITE, `onboarding`);
+      } catch (formattedErr) {
+        // Log handled
+      }
+      alert('There was a slight issue submitting your onboarding details to our secure database. Please try again or download a copy of your info.');
     } finally {
       setIsSubmitting(false);
     }

@@ -1,0 +1,7 @@
+# netlify.toml configuration file
+# This secures SPA routes and ensures client-side routing redirects to index.html instead of showing 404s.
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

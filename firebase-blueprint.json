@@ -1,0 +1,66 @@
+{
+  "entities": {
+    "Submission": {
+      "title": "Onboarding Submission",
+      "description": "A client onboarding data submission containing business, contact, historical, and security access credentials.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique auto-generated ID for the submission"
+        },
+        "submittedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 server-validated timestamp of when the submission was recorded"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["new", "reviewed", "in_progress", "completed"],
+          "description": "The processing status of this onboarding dossier"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "businessName": { "type": "string" },
+            "ownerFirstName": { "type": "string" },
+            "ownerLastName": { "type": "string" },
+            "personalEmail": { "type": "string" },
+            "personalNumber": { "type": "string" },
+            "businessEmail": { "type": "string" },
+            "businessNumber": { "type": "string" },
+            "businessDescription": { "type": "string" },
+            "whyChooseUs": { "type": "string" },
+            "specialSauce": { "type": "string" },
+            "servicesOffered": { "type": "string" },
+            "specialOffers": { "type": "string" },
+            "companyHistory": { "type": "string" },
+            "competitors": { "type": "string" },
+            "ownerVision": { "type": "string" },
+            "faq": { "type": "string" },
+            "websiteAddress": { "type": "string" },
+            "adminUsername": { "type": "string" },
+            "adminLoginCode": { "type": "string" },
+            "additionalNotes": { "type": "string" }
+          },
+          "required": [
+            "businessName",
+            "ownerFirstName",
+            "ownerLastName",
+            "personalEmail",
+            "personalNumber"
+          ]
+        }
+      },
+      "required": ["id", "submittedAt", "status", "data"]
+    }
+  },
+  "firestore": {
+    "/onboarding/{submissionId}": {
+      "schema": {
+        "$ref": "#/entities/Submission"
+      },
+      "description": "Collection where client onboarding submissions are saved."
+    }
+  }
+}
