@@ -29,6 +29,7 @@ import {
 
 const Particles = lazy(() => import('./components/Particles'));
 const OnboardingForm = lazy(() => import('./components/OnboardingForm'));
+const AdminPortal = lazy(() => import('./components/AdminPortal'));
 
 export default function App() {
   const [activeSection, setActiveSection] = useState('home');
@@ -38,6 +39,7 @@ export default function App() {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [isVideoLoading, setIsVideoLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showAdminPortal, setShowAdminPortal] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [selectedPackageForAgreement, setSelectedPackageForAgreement] = useState<string | null>(null);
   const [agreementChecked, setAgreementChecked] = useState(false);
@@ -776,6 +778,7 @@ export default function App() {
           <div style={{ display: 'flex', gap: '20px' }}>
             <a href="#privacy" onClick={(e) => { e.preventDefault(); alert("Our Privacy Policy is simple: We will never sell or share your billing, contact, or company information. All client communication and assets are guarded securely via high-end database encryption."); }}>Privacy Policy</a>
             <a href="#service-agreement" onClick={(e) => { e.preventDefault(); handleCheckout('Standalone'); }}>Service Agreement</a>
+            <a href="#admin-portal" onClick={(e) => { e.preventDefault(); setShowAdminPortal(true); }}>Admin Portal</a>
           </div>
         </div>
       </footer>
@@ -790,6 +793,7 @@ export default function App() {
       </button>
 
       {showOnboarding && <Suspense fallback={null}><OnboardingForm onClose={() => setShowOnboarding(false)} /></Suspense>}
+      {showAdminPortal && <Suspense fallback={null}><AdminPortal onClose={() => setShowAdminPortal(false)} /></Suspense>}
 
       {selectedPackageForAgreement && (
         <div className="video-modal" style={{ zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

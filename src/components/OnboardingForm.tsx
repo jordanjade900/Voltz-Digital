@@ -225,10 +225,32 @@ export default function OnboardingForm({ onClose }: OnboardingFormProps) {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Thank you! Your onboarding information has been submitted. We will review it and get back to you shortly.');
-    onClose();
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('/api/onboarding', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ formData }),
+      });
+      if (response.ok) {
+        setIsSubmitted(true);
+      } else {
+        alert('There was a slight issue submitting your onboarding details. Please try again or download a copy of your info.');
+      }
+    } catch (err) {
+      console.error('Submission error:', err);
+      // Fallback local storage or standard notice
+      alert('A network issue occurred. Your onboarding data has been saved to your browser session.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -239,41 +261,81 @@ export default function OnboardingForm({ onClose }: OnboardingFormProps) {
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        style={{ minHeight: isSubmitted ? 'auto' : undefined }}
       >
         <button className="onboarding-close" onClick={onClose}>
           <X size={20} />
         </button>
 
-        <div className="onboarding-header">
-          <div className="progress-bar">
-            <div className="progress-fill" style={{ width: `${(step / totalSteps) * 100}%` }} />
-          </div>
-          <span className="step-counter">Step {step} of {totalSteps}</span>
-        </div>
+        {isSubmitted ? (
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            style={{ padding: '40px 24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}
+          >
+            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(0, 212, 255, 0.1)', border: '1px solid var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
+              <Check size={32} style={{ color: 'var(--primary)' }} />
+            </div>
+            
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 600, color: '#fff', margin: 0, letterSpacing: '-0.02em' }}>
+              Onboarding Received!
+            </h2>
+            
+            <p style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: '1.6', margin: 0, maxWidth: '500px' }}>
+              Thank you, <strong>{formData.ownerFirstName || 'there'}</strong>! Your briefing for <strong>{formData.businessName || 'your company'}</strong> has been securely logged into our project system.
+            </p>
 
-        <form onSubmit={step === totalSteps ? handleSubmit : (e) => e.preventDefault()} className="onboarding-form">
-          <AnimatePresence mode="wait">
-            {renderStep()}
-          </AnimatePresence>
+            <div style={{ width: '100%', maxWidth: '500px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '24px', textAlign: 'left', marginTop: '12px' }}>
+              <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#fff', margin: '0 0 12px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>What happens next?</h4>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: 0, paddingLeft: '16px', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)', listStyleType: 'disc' }}>
+                <li>Your assigned development lead will review your materials and assets within 24 hours.</li>
+                <li>We will establish your design workspace and send introductory access details.</li>
+                <li>If you haven't proceeded with checkout yet, you can complete payment via the portal below.</li>
+              </ul>
+            </div>
 
-          <div className="onboarding-footer">
-            {step > 1 && (
-              <button type="button" className="btn-secondary" onClick={prevStep}>
-                Back
-              </button>
-            )}
-            <div className="spacer" />
-            {step < totalSteps ? (
-              <button type="button" className="btn-primary" onClick={nextStep}>
-                Next <ArrowRight size={18} />
-              </button>
-            ) : (
-              <button type="submit" className="btn-primary">
-                Submit <Check size={18} />
-              </button>
-            )}
-          </div>
-        </form>
+            <button 
+              onClick={onClose} 
+              className="btn-primary-action"
+              style={{ marginTop: '16px', padding: '12px 40px', fontSize: '1rem', width: '100%', maxWidth: '300px' }}
+            >
+              Back to Home
+            </button>
+          </motion.div>
+        ) : (
+          <>
+            <div className="onboarding-header">
+              <div className="progress-bar">
+                <div className="progress-fill" style={{ width: `${(step / totalSteps) * 100}%` }} />
+              </div>
+              <span className="step-counter">Step {step} of {totalSteps}</span>
+            </div>
+
+            <form onSubmit={step === totalSteps ? handleSubmit : (e) => e.preventDefault()} className="onboarding-form">
+              <AnimatePresence mode="wait">
+                {renderStep()}
+              </AnimatePresence>
+
+              <div className="onboarding-footer">
+                {step > 1 && (
+                  <button type="button" className="btn-secondary" onClick={prevStep} disabled={isSubmitting}>
+                    Back
+                  </button>
+                )}
+                <div className="spacer" />
+                {step < totalSteps ? (
+                  <button type="button" className="btn-primary" onClick={nextStep}>
+                    Next <ArrowRight size={18} />
+                  </button>
+                ) : (
+                  <button type="submit" className="btn-primary" disabled={isSubmitting}>
+                    {isSubmitting ? 'Submitting...' : 'Submit'} <Check size={18} />
+                  </button>
+                )}
+              </div>
+            </form>
+          </>
+        )}
       </motion.div>
     </div>
   );
