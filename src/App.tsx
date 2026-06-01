@@ -86,7 +86,10 @@ export default function App() {
     // Check for onboarding trigger in URL
     const params = new URLSearchParams(window.location.search);
     if (params.get('onboarding') === 'true' || params.get('order') === 'success') {
-      setShowOnboarding(true);
+      if (localStorage.getItem('skipOnboarding') !== 'true') {
+        setShowOnboarding(true);
+      }
+      localStorage.removeItem('skipOnboarding');
       // Clean up URL without refreshing
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -205,16 +208,32 @@ export default function App() {
     setAgreementChecked(packageType === 'Standalone'); // Standalone agreement preview doesn't require check to dismiss or read
   };
 
-  const handleProceedToPayment = (packageType: string) => {
-    const checkoutLinks: { [key: string]: string } = {
-      'Bronze': 'https://whop.com/checkout/plan_hYndIG5BiktAY',
-      'Silver': 'https://whop.com/checkout/plan_wRUfg71dqDjJL',
-      'Gold': 'https://whop.com/checkout/plan_UN9zDYrXtPQsp',
-      'Pulse': 'https://whop.com/checkout/plan_JOjIYmrTrTHkE',
-      'Supercharge': 'https://whop.com/checkout/plan_pP9bDrydl30dS'
+  const handleProceedToPayment = (packageType: string, paymentMode: 'upfront' | 'split1' | 'split2' = 'upfront') => {
+    // If they are paying the remaining balance, skip onboarding
+    if (paymentMode === 'split2') {
+      localStorage.setItem('skipOnboarding', 'true');
+    } else {
+      localStorage.removeItem('skipOnboarding');
+    }
+
+    const checkoutLinks: { [key: string]: { upfront?: string, split1?: string, split2?: string } } = {
+      'Bronze': { upfront: 'https://whop.com/checkout/plan_hYndIG5BiktAY' },
+      'Silver': { 
+        upfront: 'https://whop.com/checkout/plan_wRUfg71dqDjJL',
+        split1: 'https://whop.com/checkout/plan_5bICcD2lWA2wc',
+        split2: 'https://whop.com/checkout/plan_VcaUz3IftEDXT'
+      },
+      'Gold': { 
+        upfront: 'https://whop.com/checkout/plan_UN9zDYrXtPQsp',
+        split1: 'https://whop.com/checkout/plan_1vUkJJvzi1BFn',
+        split2: 'https://whop.com/checkout/plan_AJ6jj0aAhx3hy'
+      },
+      'Pulse': { upfront: 'https://whop.com/checkout/plan_JOjIYmrTrTHkE' },
+      'Supercharge': { upfront: 'https://whop.com/checkout/plan_pP9bDrydl30dS' }
     };
     
-    const url = checkoutLinks[packageType] || 'https://whop.com/voltz-digital/checkout/prod_w4K0Oa0QTDnKx?direct=true';
+    const planLinks = checkoutLinks[packageType] || {};
+    const url = planLinks[paymentMode] || planLinks.upfront || 'https://whop.com/voltz-digital/checkout/prod_w4K0Oa0QTDnKx?direct=true';
     window.open(url, "_blank");
     setSelectedPackageForAgreement(null);
   };
@@ -1027,7 +1046,7 @@ export default function App() {
                       I have read and agree to the <strong>Voltz Digital Service Agreement</strong> and understand that work begins after payment and onboarding.
                     </span>
                   </label>
-                  <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-end' }}>
+                  <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                     <button 
                       onClick={() => setSelectedPackageForAgreement(null)} 
                       className="btn-outline" 
@@ -1035,23 +1054,79 @@ export default function App() {
                     >
                       Cancel
                     </button>
-                    <button 
-                      disabled={!agreementChecked} 
-                      onClick={() => handleProceedToPayment(selectedPackageForAgreement)} 
-                      className={agreementChecked ? "btn-primary-action" : "btn-outline"}
-                      style={{ 
-                        padding: '12px 28px', 
-                        fontSize: '0.95rem', 
-                        opacity: agreementChecked ? 1 : 0.4, 
-                        cursor: agreementChecked ? 'pointer' : 'not-allowed',
-                        boxShadow: agreementChecked ? '0 0 15px rgba(0, 212, 255, 0.3)' : 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                      }}
-                    >
-                      Proceed to Secure Checkout <ArrowRight size={16} />
-                    </button>
+
+                    {(selectedPackageForAgreement === 'Silver' || selectedPackageForAgreement === 'Gold') ? (
+                      <div className="flex gap-4 items-start">
+                        <button 
+                          disabled={!agreementChecked} 
+                          onClick={() => handleProceedToPayment(selectedPackageForAgreement, 'upfront')} 
+                          className={agreementChecked ? "btn-primary-action" : "btn-outline"}
+                          style={{ 
+                            padding: '12px 28px', 
+                            fontSize: '0.95rem', 
+                            opacity: agreementChecked ? 1 : 0.4, 
+                            cursor: agreementChecked ? 'pointer' : 'not-allowed',
+                            boxShadow: agreementChecked ? '0 0 15px rgba(0, 212, 255, 0.3)' : 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            height: '46px'
+                          }}
+                        >
+                          Pay Upfront (100%) <ArrowRight size={16} />
+                        </button>
+                        
+                        <div className="flex flex-col gap-3">
+                           <button 
+                             disabled={!agreementChecked} 
+                             onClick={() => handleProceedToPayment(selectedPackageForAgreement, 'split1')} 
+                             className={agreementChecked ? "btn-primary-action" : "btn-outline"}
+                             style={{ 
+                               padding: '12px 28px', 
+                               fontSize: '0.95rem', 
+                               opacity: agreementChecked ? 1 : 0.4, 
+                               cursor: agreementChecked ? 'pointer' : 'not-allowed',
+                               boxShadow: agreementChecked ? '0 0 15px rgba(0, 212, 255, 0.3)' : 'none',
+                               display: 'flex',
+                               alignItems: 'center',
+                               background: agreementChecked ? 'transparent' : 'transparent',
+                               border: '1px solid #00D4FF',
+                               gap: '8px',
+                               height: '46px'
+                             }}
+                           >
+                             Pay 50% To Start <ArrowRight size={16} />
+                           </button>
+                           
+                           <button 
+                             disabled={!agreementChecked} 
+                             onClick={() => handleProceedToPayment(selectedPackageForAgreement, 'split2')} 
+                             className="text-[0.85rem] text-[var(--text-muted)] hover:text-white transition duration-300 underline flex justify-end"
+                             style={{ opacity: agreementChecked ? 1 : 0.4, cursor: agreementChecked ? 'pointer' : 'not-allowed', width: '100%', textAlign: 'right' }}
+                           >
+                             Pay Remaining 50% Balance
+                           </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button 
+                        disabled={!agreementChecked} 
+                        onClick={() => handleProceedToPayment(selectedPackageForAgreement)} 
+                        className={agreementChecked ? "btn-primary-action" : "btn-outline"}
+                        style={{ 
+                          padding: '12px 28px', 
+                          fontSize: '0.95rem', 
+                          opacity: agreementChecked ? 1 : 0.4, 
+                          cursor: agreementChecked ? 'pointer' : 'not-allowed',
+                          boxShadow: agreementChecked ? '0 0 15px rgba(0, 212, 255, 0.3)' : 'none',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}
+                      >
+                        Proceed to Secure Checkout <ArrowRight size={16} />
+                      </button>
+                    )}
                   </div>
                 </>
               ) : (
