@@ -39,6 +39,8 @@ export default function App() {
   const [isVideoLoading, setIsVideoLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [selectedPackageForAgreement, setSelectedPackageForAgreement] = useState<string | null>(null);
+  const [agreementChecked, setAgreementChecked] = useState(false);
   const navIndicatorRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const isAutoScrolling = useRef(false);
@@ -197,8 +199,22 @@ export default function App() {
   };
 
   const handleCheckout = (packageType: string) => {
-    // Redirect to Whop checkout link in a new tab
-    window.open("https://whop.com/voltz-digital/checkout/prod_w4K0Oa0QTDnKx?direct=true", "_blank");
+    setSelectedPackageForAgreement(packageType);
+    setAgreementChecked(packageType === 'Standalone'); // Standalone agreement preview doesn't require check to dismiss or read
+  };
+
+  const handleProceedToPayment = (packageType: string) => {
+    const checkoutLinks: { [key: string]: string } = {
+      'Bronze': 'https://whop.com/checkout/plan_hYndIG5BiktAY',
+      'Silver': 'https://whop.com/checkout/plan_wRUfg71dqDjJL',
+      'Gold': 'https://whop.com/checkout/plan_UN9zDYrXtPQsp',
+      'Pulse': 'https://whop.com/checkout/plan_JOjIYmrTrTHkE',
+      'Supercharge': 'https://whop.com/checkout/plan_pP9bDrydl30dS'
+    };
+    
+    const url = checkoutLinks[packageType] || 'https://whop.com/voltz-digital/checkout/prod_w4K0Oa0QTDnKx?direct=true';
+    window.open(url, "_blank");
+    setSelectedPackageForAgreement(null);
   };
 
     const portfolioItems = [
@@ -758,8 +774,8 @@ export default function App() {
         <div className="footer-bottom">
           <div>&copy; 2026 Voltz Digital. All rights reserved.</div>
           <div style={{ display: 'flex', gap: '20px' }}>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
+            <a href="#privacy" onClick={(e) => { e.preventDefault(); alert("Our Privacy Policy is simple: We will never sell or share your billing, contact, or company information. All client communication and assets are guarded securely via high-end database encryption."); }}>Privacy Policy</a>
+            <a href="#service-agreement" onClick={(e) => { e.preventDefault(); handleCheckout('Standalone'); }}>Service Agreement</a>
           </div>
         </div>
       </footer>
@@ -774,6 +790,282 @@ export default function App() {
       </button>
 
       {showOnboarding && <Suspense fallback={null}><OnboardingForm onClose={() => setShowOnboarding(false)} /></Suspense>}
+
+      {selectedPackageForAgreement && (
+        <div className="video-modal" style={{ zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="video-modal-content" style={{ maxWidth: '800px', width: '90%', maxHeight: '90vh', display: 'flex', flexDirection: 'column', background: '#050505', border: '1px solid rgba(0, 212, 255, 0.2)', borderRadius: '16px' }} onClick={e => e.stopPropagation()}>
+            
+            {/* Modal Header */}
+            <div style={{ padding: '24px 32px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ fontSize: '1.6rem', fontWeight: 500, margin: 0, color: '#fff', letterSpacing: '-0.02em' }}>
+                  {selectedPackageForAgreement === 'Standalone' ? 'Voltz Digital Service Agreement' : `Service Agreement: ${selectedPackageForAgreement} Package`}
+                </h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.9rem', color: 'var(--text-muted)', opacity: 0.8 }}>
+                  {selectedPackageForAgreement === 'Standalone' ? 'Please review our service, payment, and delivery policies.' : 'Please read and accept the agreement to proceed with checkout.'}
+                </p>
+              </div>
+              <button 
+                onClick={() => setSelectedPackageForAgreement(null)} 
+                style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', opacity: 0.7 }}
+                className="hover:opacity-100 hover:text-[#00D4FF] transition"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Scrollable Agreement Body */}
+            <div style={{ padding: '32px', overflowY: 'auto', flexGrow: 1, fontSize: '0.95rem', lineHeight: '1.7', color: 'rgba(255, 255, 255, 0.85)' }} className="scrollbar-custom">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                
+                <div style={{ textAlign: 'center', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', paddingBottom: '20px', marginBottom: '10px' }}>
+                  <h2 style={{ fontSize: '1.8rem', fontWeight: 600, color: 'var(--primary)', margin: '0 0 8px 0', letterSpacing: '0.05em' }}>VOLTZ DIGITAL</h2>
+                  <h4 style={{ fontSize: '1.1rem', fontWeight: 500, color: '#fff', margin: '0 0 12px 0', letterSpacing: '0.1em' }}>SERVICE AGREEMENT</h4>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }}>Last Updated: June 2026</p>
+                </div>
+
+                <p style={{ fontWeight: 500 }}>
+                  By purchasing any service from Voltz Digital, you ("Client") acknowledge that you have read, understood, and agreed to the following terms.
+                </p>
+
+                <div>
+                  <h5 style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>SERVICES</h5>
+                  <p>Voltz Digital provides website design, website development, branding, consulting, maintenance, and related digital services.</p>
+                  <p style={{ marginTop: '8px' }}>The specific deliverables included in your purchase are determined by the package selected at checkout and any information submitted through the onboarding process.</p>
+                </div>
+
+                <div>
+                  <h5 style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>PROJECT COMMENCEMENT</h5>
+                  <p>Work begins only after:</p>
+                  <ul style={{ listStyleType: 'decimal', paddingLeft: '20px', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <li>Payment has been successfully received.</li>
+                    <li>The onboarding form has been completed.</li>
+                    <li>Required assets and information have been supplied.</li>
+                  </ul>
+                  <p style={{ marginTop: '8px' }}>Failure to provide required information may delay project delivery.</p>
+                </div>
+
+                <div>
+                  <h5 style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>CLIENT RESPONSIBILITIES</h5>
+                  <p>The Client agrees to provide:</p>
+                  <ul style={{ listStyleType: 'disc', paddingLeft: '20px', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <li>Accurate business information.</li>
+                    <li>Required content and images.</li>
+                    <li>Branding materials where applicable.</li>
+                    <li>Timely feedback and approvals.</li>
+                  </ul>
+                  <p style={{ marginTop: '8px' }}>The Client is responsible for ensuring that all submitted materials are owned, licensed, or legally authorized for use.</p>
+                </div>
+
+                <div>
+                  <h5 style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>PAYMENT</h5>
+                  <p>All project payments are due in full before work begins unless otherwise agreed in writing.</p>
+                  <p style={{ marginTop: '8px' }}>Payments are processed securely through approved payment providers.</p>
+                  <p style={{ marginTop: '8px' }}>By submitting payment, the Client authorizes Voltz Digital to begin work on the selected service package.</p>
+                </div>
+
+                <div>
+                  <h5 style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>REFUND POLICY</h5>
+                  <p>Due to the custom nature of digital services:</p>
+                  <ul style={{ listStyleType: 'disc', paddingLeft: '20px', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <li>Payments are non-refundable once project work has commenced.</li>
+                    <li>Refund requests submitted before work begins may be reviewed at Voltz Digital\'s discretion.</li>
+                    <li>Completed work, partially completed work, strategy, design, development, research, and consultation time are non-refundable.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h5 style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>REVISIONS</h5>
+                  <p>Projects include revisions appropriate to the purchased package.</p>
+                  <p style={{ marginTop: '8px' }}>Minor design and content adjustments are included.</p>
+                  <p style={{ marginTop: '8px' }}>Requests that significantly alter the original scope, structure, functionality, or direction of the project may require additional fees.</p>
+                  <p style={{ marginTop: '8px' }}>Voltz Digital reserves the right to determine whether a request falls outside the original scope.</p>
+                </div>
+
+                <div>
+                  <h5 style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>PROJECT TIMELINES</h5>
+                  <p>Estimated delivery timelines may vary depending on:</p>
+                  <ul style={{ listStyleType: 'disc', paddingLeft: '20px', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <li>Project complexity.</li>
+                    <li>Client response times.</li>
+                    <li>Content delivery delays.</li>
+                    <li>Third-party service delays.</li>
+                  </ul>
+                  <p style={{ marginTop: '8px' }}>Voltz Digital is not responsible for delays caused by missing information, delayed approvals, or external providers.</p>
+                </div>
+
+                <div>
+                  <h5 style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>WEBSITE OWNERSHIP</h5>
+                  <p>Upon project completion and full payment:</p>
+                  <p style={{ marginTop: '8px', fontWeight: 500 }}>The Client receives ownership of:</p>
+                  <ul style={{ listStyleType: 'disc', paddingLeft: '20px', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <li>The final website deliverables.</li>
+                    <li>Custom design assets created specifically for the project.</li>
+                    <li>Client-provided content and branding materials.</li>
+                  </ul>
+                  <p style={{ marginTop: '12px', fontWeight: 500 }}>Voltz Digital retains ownership of:</p>
+                  <ul style={{ listStyleType: 'disc', paddingLeft: '20px', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <li>Internal systems.</li>
+                    <li>Development methodologies.</li>
+                    <li>Proprietary workflows.</li>
+                    <li>Reusable code libraries.</li>
+                    <li>Frameworks and tools used during development.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h5 style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>DOMAINS, HOSTING, AND THIRD-PARTY SERVICES</h5>
+                  <p>Unless otherwise specified:</p>
+                  <p style={{ marginTop: '8px', fontWeight: 500 }}>The Client is responsible for:</p>
+                  <ul style={{ listStyleType: 'disc', paddingLeft: '20px', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <li>Domain registration.</li>
+                    <li>Hosting fees.</li>
+                    <li>Third-party subscriptions.</li>
+                    <li>Email services.</li>
+                    <li>Software licensing fees.</li>
+                  </ul>
+                  <p style={{ marginTop: '8px' }}>Voltz Digital may assist with setup but does not assume ownership of third-party accounts.</p>
+                </div>
+
+                <div>
+                  <h5 style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>MAINTENANCE SERVICES</h5>
+                  <p>Maintenance plans are optional recurring services.</p>
+                  <p style={{ marginTop: '8px' }}>If a maintenance plan is purchased, Voltz Digital will provide the services described within the selected maintenance package.</p>
+                  <p style={{ marginTop: '8px', fontWeight: 500 }}>If maintenance is cancelled:</p>
+                  <ul style={{ listStyleType: 'disc', paddingLeft: '20px', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <li>The Client retains ownership of the website.</li>
+                    <li>The website remains operational under the Client\'s hosting arrangements.</li>
+                    <li>Voltz Digital\'s maintenance obligations cease.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h5 style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>PORTFOLIO RIGHTS</h5>
+                  <p>Voltz Digital may display completed projects in:</p>
+                  <ul style={{ listStyleType: 'disc', paddingLeft: '20px', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <li>Portfolio showcases.</li>
+                    <li>Marketing materials.</li>
+                    <li>Social media.</li>
+                    <li>Case studies.</li>
+                  </ul>
+                  <p style={{ marginTop: '8px' }}>This right does not transfer ownership of the Client\'s business or trademarks.</p>
+                </div>
+
+                <div>
+                  <h5 style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>LIMITATION OF LIABILITY</h5>
+                  <p>To the fullest extent permitted by law, Voltz Digital shall not be liable for:</p>
+                  <ul style={{ listStyleType: 'disc', paddingLeft: '20px', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <li>Loss of profits.</li>
+                    <li>Business interruption.</li>
+                    <li>Data loss.</li>
+                    <li>Revenue loss.</li>
+                    <li>Indirect damages.</li>
+                    <li>Consequential damages.</li>
+                  </ul>
+                  <p style={{ marginTop: '8px' }}>Total liability shall not exceed the amount paid by the Client for the purchased service.</p>
+                </div>
+
+                <div>
+                  <h5 style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>TERMINATION</h5>
+                  <p>Voltz Digital reserves the right to refuse, suspend, or terminate services if:</p>
+                  <ul style={{ listStyleType: 'disc', paddingLeft: '20px', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <li>False information is provided.</li>
+                    <li>Abuse or harassment occurs.</li>
+                    <li>Required cooperation is not provided.</li>
+                    <li>The project becomes impossible to complete due to Client actions.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h5 style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>NO GUARANTEE OF BUSINESS RESULTS</h5>
+                  <p>While Voltz Digital strives to create high-quality digital experiences, no guarantee is made regarding:</p>
+                  <ul style={{ listStyleType: 'disc', paddingLeft: '20px', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <li>Revenue increases.</li>
+                    <li>Search engine rankings.</li>
+                    <li>Lead generation.</li>
+                    <li>Conversion rates.</li>
+                    <li>Business performance.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h5 style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>GOVERNING LAW</h5>
+                  <p>These terms shall be governed by and interpreted in accordance with the laws of Jamaica.</p>
+                  <p style={{ marginTop: '8px' }}>Any disputes shall be subject to the jurisdiction of the courts of Jamaica.</p>
+                </div>
+
+                <div>
+                  <h5 style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>ACCEPTANCE</h5>
+                  <p>By proceeding with payment, the Client confirms that:</p>
+                  <ul style={{ listStyleType: 'decimal', paddingLeft: '20px', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <li>They have read this Service Agreement.</li>
+                    <li>They understand the terms.</li>
+                    <li>They agree to be legally bound by these terms.</li>
+                  </ul>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Required Checkbox and Checkout Actions Footer */}
+            <div style={{ padding: '24px 32px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', background: 'rgba(0, 0, 0, 0.8)' }}>
+              {selectedPackageForAgreement !== 'Standalone' ? (
+                <>
+                  <label className="flex items-start gap-3 select-none text-left" style={{ cursor: 'pointer', marginBottom: '20px' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={agreementChecked} 
+                      onChange={(e) => setAgreementChecked(e.target.checked)} 
+                      className="w-5 h-5 rounded bg-black text-[#00D4FF] focus:ring-0 focus:ring-offset-0 border-white/20 accent-[#00D4FF]"
+                      style={{ marginTop: '2px', cursor: 'pointer' }}
+                    />
+                    <span style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5 }}>
+                      I have read and agree to the <strong>Voltz Digital Service Agreement</strong> and understand that work begins after payment and onboarding.
+                    </span>
+                  </label>
+                  <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-end' }}>
+                    <button 
+                      onClick={() => setSelectedPackageForAgreement(null)} 
+                      className="btn-outline" 
+                      style={{ padding: '12px 24px', fontSize: '0.95rem' }}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      disabled={!agreementChecked} 
+                      onClick={() => handleProceedToPayment(selectedPackageForAgreement)} 
+                      className={agreementChecked ? "btn-primary-action" : "btn-outline"}
+                      style={{ 
+                        padding: '12px 28px', 
+                        fontSize: '0.95rem', 
+                        opacity: agreementChecked ? 1 : 0.4, 
+                        cursor: agreementChecked ? 'pointer' : 'not-allowed',
+                        boxShadow: agreementChecked ? '0 0 15px rgba(0, 212, 255, 0.3)' : 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      Proceed to Secure Checkout <ArrowRight size={16} />
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <button 
+                    onClick={() => setSelectedPackageForAgreement(null)} 
+                    className="btn-primary-action" 
+                    style={{ padding: '12px 32px', fontSize: '0.95rem', boxShadow: '0 0 15px rgba(0, 212, 255, 0.3)' }}
+                  >
+                    Ok, Got It
+                  </button>
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
