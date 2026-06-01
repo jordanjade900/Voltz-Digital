@@ -1101,8 +1101,8 @@ export default function App() {
                            <button 
                              disabled={!agreementChecked} 
                              onClick={() => handleProceedToPayment(selectedPackageForAgreement, 'split2')} 
-                             className="text-[0.85rem] text-[var(--text-muted)] hover:text-white transition duration-300 underline flex justify-end"
-                             style={{ opacity: agreementChecked ? 1 : 0.4, cursor: agreementChecked ? 'pointer' : 'not-allowed', width: '100%', textAlign: 'right' }}
+                             className="text-[0.85rem] text-white hover:text-[#00D4FF] transition duration-300 underline flex justify-end"
+                             style={{ cursor: agreementChecked ? 'pointer' : 'not-allowed', width: '100%', textAlign: 'right' }}
                            >
                              Pay Remaining 50% Balance
                            </button>
