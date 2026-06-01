@@ -366,27 +366,27 @@ export default function App() {
               <div className="minimal-card fade-up delay-1">
                 <Bolt size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
                 <h3>Website Design</h3>
-                <p>Modern, mobile-responsive websites that get you customers and look great on any device. We focus on conversion-driven design.</p>
+                <p>Modern, mobile-responsive websites designed to attract customers and look outstanding on any device. We focus on conversion-driven aesthetics.</p>
               </div>
               <div className="minimal-card fade-up delay-2">
                 <Target size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
                 <h3>SEO Optimization</h3>
-                <p>Get found on Google and dominate your local market with our proven SEO strategies. Built into the code from day one.</p>
+                <p>Increase search rankings on Google and dominate your market with our proven SEO strategies, integrated into the source code from day one.</p>
               </div>
               <div className="minimal-card fade-up delay-3">
                 <ShieldCheck size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
                 <h3>Website Maintenance</h3>
-                <p>Keep your site fast, secure, and always online with our reliable maintenance plans. We handle the technical details.</p>
+                <p>Keep your platform fast, secure, and continuously online with our reliable maintenance plans, leaving the technical details to our team.</p>
               </div>
               <div className="minimal-card fade-up delay-1">
                 <Pen size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
                 <h3>Copywriting</h3>
-                <p>Persuasive, SEO-optimized content that speaks directly to your target audience and drives them to take action.</p>
+                <p>Persuasive, SEO-optimized copy that speaks directly to your target audience and motivates them to engage.</p>
               </div>
               <div className="minimal-card fade-up delay-2">
                 <TrendingUp size={32} strokeWidth={1.5} style={{ color: 'var(--primary)', marginBottom: '20px' }} />
                 <h3>Analytics Setup</h3>
-                <p>Track your success with advanced analytics integration, giving you clear insights into your website's performance.</p>
+                <p>Track your business success with advanced analytics integrations, providing clear, actionable insights into visitor behaviors and website performance.</p>
               </div>
             </div>
           </div>
@@ -508,7 +508,7 @@ export default function App() {
             <div className="maintenance-section fade-up delay-1">
               <div className="section-header" style={{ marginBottom: '50px' }}>
                 <h2 style={{ fontSize: '2rem' }}>Maintenance Infrastructure</h2>
-                <p>Ensure your digital assets remain high-velocity, secure, and always online.</p>
+                <p>Ensure your digital assets remain high-velocity, secure, and always online. Please note that maintenance services are mandatory after the free period for select plans (Pulse package is mandatory, Supercharge package is optional).</p>
               </div>
               <div className="grid grid-2" style={{ maxWidth: '900px', margin: '0 auto', gap: '30px' }}>
                 {[
@@ -543,7 +543,7 @@ export default function App() {
                 maxWidth: '100%'
               }}>
                 <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '15px' }}>
-                  💳 Secure Checkout via <strong>WHOP</strong> | Credit Cards & PayPal Accepted | 256-bit SSL Encryption | 100% Money-Back Guarantee
+                  💳 Secure Checkout via <strong>WHOP</strong> | Credit Cards & PayPal Accepted | 256-bit SSL Encryption
                 </p>
                 <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', opacity: 0.7 }}>
                   <CreditCard size={24} />
@@ -874,7 +874,7 @@ export default function App() {
                   <ul style={{ listStyleType: 'disc', paddingLeft: '20px', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <li>Payments are non-refundable once project work has commenced.</li>
                     <li>Refund requests submitted before work begins may be reviewed at Voltz Digital\'s discretion.</li>
-                    <li>Completed work, partially completed work, strategy, design, development, research, and consultation time are non-refundable.</li>
+                    <li>Completed work, partially completed work, strategy, design, development, and research are non-refundable.</li>
                   </ul>
                 </div>
 
@@ -933,8 +933,8 @@ export default function App() {
 
                 <div>
                   <h5 style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>MAINTENANCE SERVICES</h5>
-                  <p>Maintenance plans are optional recurring services.</p>
-                  <p style={{ marginTop: '8px' }}>If a maintenance plan is purchased, Voltz Digital will provide the services described within the selected maintenance package.</p>
+                  <p>Maintenance services are mandatory after the free period for select plans. Specifically, the Pulse maintenance plan is mandatory, whereas the Supercharge maintenance plan is optional.</p>
+                  <p style={{ marginTop: '8px' }}>If a maintenance plan is active, Voltz Digital will provide the services described within the selected maintenance package.</p>
                   <p style={{ marginTop: '8px', fontWeight: 500 }}>If maintenance is cancelled:</p>
                   <ul style={{ listStyleType: 'disc', paddingLeft: '20px', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <li>The Client retains ownership of the website.</li>

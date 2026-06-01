@@ -1,0 +1,29 @@
+[
+  {
+    "id": "sub_test_123456789",
+    "submittedAt": "2026-06-01T18:58:00.000Z",
+    "status": "new",
+    "data": {
+      "businessName": "Apex Fitness Elite",
+      "ownerFirstName": "Marcus",
+      "ownerLastName": "Thorne",
+      "personalEmail": "marcus.thorne@example.com",
+      "personalNumber": "+1 (555) 382-9901",
+      "businessEmail": "info@apexfitnesselite.com",
+      "businessNumber": "+1 (555) 382-9900",
+      "businessDescription": "Premium boutique strength and conditioning facilities focusing on personal training, custom athletic meal planning, and biometric tracking. Our market segment is high-earning professionals looking for elite body transformations.",
+      "whyChooseUs": "Unlike corporate box gyms, we provide fully personalized Olympic coach matching, medical-grade body scans every 30 days, and private hyperbaric chamber therapy sessions.",
+      "specialSauce": "Our custom mobile app directly synchronizes with clients' wearable health trackers and feeds real-time nutrition deficits directly to our in-house private chefs.",
+      "servicesOffered": "1. Elite Personal Training Packages\n2. Biometric InBody Body Composition Analysis\n3. Private Chef Prepared Meal Handouts\n4. Infrared Sauna Recovery Sessions",
+      "specialOffers": "Founder membership promotion: 25% off personal training services for the first 3 months with zero signup fees.",
+      "companyHistory": "Established in 2024 with a single premium location. Expanding to 3 physical workspaces by late 2026.",
+      "competitors": "Equinox, OrangeTheory, local premium powerlifting garages.",
+      "ownerVision": "To build an iconic physical-digital hybrid fitness brand that bridges medical scientific data with premium functional luxury.",
+      "faq": "Q: Do you offer corporate group discounts?\nA: Yes, packages starting at 10+ employees enjoy custom rates.\n\nQ: Is parking included?\nA: Yes, all memberships include free private underground valet parking.",
+      "websiteAddress": "apexfitnesselite.com",
+      "adminUsername": "marcus_apex_admin",
+      "adminLoginCode": "VaultPass!2026",
+      "additionalNotes": "Currently hosted on Wix under a basic plan. We need a modern, high-speed custom React application with premium motion designs to match our luxurious brand alignment."
+    }
+  }
+]

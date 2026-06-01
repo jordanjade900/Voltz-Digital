@@ -19,6 +19,7 @@ import {
   CheckSquare
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import OnboardingForm from './OnboardingForm';
 
 interface AdminPortalProps {
   onClose: () => void;
@@ -64,6 +65,8 @@ export default function AdminPortal({ onClose }: AdminPortalProps) {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [emailStatus, setEmailStatus] = useState<{ loading: boolean; success?: boolean; message?: string } | null>(null);
+  const [showFormPreview, setShowFormPreview] = useState(false);
 
   // Attempt login with stored password if available
   useEffect(() => {
@@ -182,6 +185,29 @@ export default function AdminPortal({ onClose }: AdminPortalProps) {
     } catch (err) {
       console.error('Delete error:', err);
       alert('Network error while deleting.');
+    }
+  };
+
+  const handleSendTestEmail = async (submissionId?: string) => {
+    setEmailStatus({ loading: true });
+    try {
+      const currentPass = password || sessionStorage.getItem('voltz_admin_token') || '';
+      const response = await fetch('/api/onboarding/test-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-password': currentPass
+        },
+        body: JSON.stringify({ submissionId })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setEmailStatus({ loading: false, success: true, message: data.message || 'Onboarding briefing dispatched successfully!' });
+      } else {
+        setEmailStatus({ loading: false, success: false, message: data.error || 'Diagnostic test email failed' });
+      }
+    } catch (err: any) {
+      setEmailStatus({ loading: false, success: false, message: err.message || 'Network failure connecting to SMTP service.' });
     }
   };
 
@@ -334,13 +360,34 @@ SYSTEM CREDENTIALS & HANDOVER:
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             {isAuthenticated && (
-              <button 
-                onClick={handleLogOut} 
-                className="btn-outline" 
-                style={{ padding: '8px 16px', fontSize: '0.85rem', margin: 0, borderColor: 'rgba(255,59,59,0.3)', color: 'rgba(255,90,90,0.9)' }}
-              >
-                Disconnect Portal
-              </button>
+              <>
+                <button 
+                  onClick={() => setShowFormPreview(true)} 
+                  className="btn-primary-action" 
+                  style={{ 
+                    padding: '8px 16px', 
+                    fontSize: '0.85rem', 
+                    margin: 0, 
+                    background: 'rgba(0, 212, 255, 0.1)', 
+                    border: '1px solid rgba(0, 212, 255, 0.35)', 
+                    color: '#00D4FF',
+                    fontWeight: 500,
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <FileText size={14} /> Preview Onboarding Flow
+                </button>
+                <button 
+                  onClick={handleLogOut} 
+                  className="btn-outline" 
+                  style={{ padding: '8px 16px', fontSize: '0.85rem', margin: 0, borderColor: 'rgba(255,59,59,0.3)', color: 'rgba(255,90,90,0.9)', borderRadius: '8px' }}
+                >
+                  Disconnect Portal
+                </button>
+              </>
             )}
             <button 
               onClick={onClose} 
@@ -434,6 +481,30 @@ SYSTEM CREDENTIALS & HANDOVER:
               {/* Search & Filters */}
               <div style={{ padding: '20px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 
+                <button 
+                  onClick={() => setShowFormPreview(true)}
+                  className="btn-primary-action hover:bg-[#00D4FF]/20"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    fontSize: '0.88rem',
+                    background: 'rgba(0, 212, 255, 0.08)',
+                    border: '1px solid rgba(0, 212, 255, 0.25)',
+                    color: '#00D4FF',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    margin: 0
+                  }}
+                >
+                  <FileText size={16} /> Test Onboarding Form Flow
+                </button>
+
                 {/* Search query input */}
                 <div style={{ position: 'relative' }}>
                   <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.4)' }} />
@@ -628,6 +699,33 @@ SYSTEM CREDENTIALS & HANDOVER:
                         <Download size={13} /> JSON
                       </button>
 
+                      {/* Email Brief option */}
+                      <button
+                        onClick={() => handleSendTestEmail(activeSubmission.id)}
+                        disabled={emailStatus?.loading}
+                        className="btn-outline"
+                        style={{ 
+                          padding: '8px 14px', 
+                          fontSize: '0.85rem', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '6px', 
+                          margin: 0,
+                          borderColor: emailStatus?.loading ? 'rgba(255,255,255,0.05)' : 'rgba(0, 212, 255, 0.25)',
+                          color: emailStatus?.loading ? 'rgba(255,255,255,0.3)' : '#00D4FF'
+                        }}
+                      >
+                        {emailStatus?.loading ? (
+                          <>
+                            <RefreshCw size={13} className="animate-spin" style={{ animation: 'spin 1.5s linear infinite' }} /> Sending...
+                          </>
+                        ) : (
+                          <>
+                            <Mail size={13} /> Email Brief
+                          </>
+                        )}
+                      </button>
+
                       {/* Delete button (with confirmation toggle) */}
                       {deleteConfirmId === activeSubmission.id ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -671,6 +769,48 @@ SYSTEM CREDENTIALS & HANDOVER:
                   {/* Scrollable grid details container */}
                   <div style={{ flexGrow: 1, overflowY: 'auto', padding: '36px' }} className="scrollbar-custom">
                     
+                    {/* Email Dispatch Diagnostics Banner */}
+                    {emailStatus && (
+                      <div 
+                        style={{ 
+                          background: emailStatus.success === true ? 'rgba(16, 185, 129, 0.1)' : emailStatus.success === false ? 'rgba(239, 68, 68, 0.1)' : 'rgba(0, 212, 255, 0.08)',
+                          border: `1px solid ${emailStatus.success === true ? 'rgba(16, 185, 129, 0.3)' : emailStatus.success === false ? 'rgba(239, 68, 68, 0.3)' : 'rgba(0, 212, 255, 0.2)'}`,
+                          borderRadius: '12px',
+                          padding: '16px 20px',
+                          marginBottom: '28px',
+                          display: 'flex',
+                          gap: '14px',
+                          alignItems: 'flex-start',
+                          position: 'relative'
+                        }}
+                      >
+                        <div style={{ flexShrink: 0, marginTop: '2px', color: emailStatus.success === true ? '#10b981' : emailStatus.success === false ? '#ef4444' : '#00D4FF' }}>
+                          {emailStatus.loading ? (
+                            <RefreshCw size={18} style={{ animation: 'spin 1.5s linear infinite' }} />
+                          ) : emailStatus.success === true ? (
+                            <Check size={18} />
+                          ) : (
+                            <AlertCircle size={18} />
+                          )}
+                        </div>
+                        <div style={{ flexGrow: 1 }}>
+                          <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#fff', marginBottom: '4px' }}>
+                            {emailStatus.loading ? 'Dispatching Diagnostics Brief...' : emailStatus.success === true ? 'SMTP Transmission Successful!' : 'SMTP Transmission Errored'}
+                          </div>
+                          <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.45 }}>
+                            {emailStatus.message || (emailStatus.loading && 'Connecting to mail server, authenticating, and sending onboarding briefing dossier...')}
+                          </div>
+                        </div>
+                        <button 
+                          onClick={() => setEmailStatus(null)}
+                          style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: '2px', position: 'absolute', top: '12px', right: '12px' }}
+                          className="hover:text-white"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    )}
+
                     <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '32px', maxWidth: '1000px', margin: '0 auto' }}>
                       
                       {/* Section 1: Contact Information */}
@@ -899,6 +1039,13 @@ SYSTEM CREDENTIALS & HANDOVER:
             </div>
 
           </div>
+        )}
+
+        {showFormPreview && (
+          <OnboardingForm 
+            isPreview={true} 
+            onClose={() => setShowFormPreview(false)} 
+          />
         )}
 
       </div>
